@@ -210,7 +210,7 @@
         <div class="section">
             <h2>📊 Current Status</h2>
             <p><strong>Lent to:</strong> <span id="currentLoanName">-</span></p>
-            <p><strong>Daily Rate:</strong> <span id="dailyRate">0.000%</span></p>
+            <p><strong>Interest Rate:</strong> <span id="dailyRate">0.0000% per day</span></p>
             <p><strong>Last Updated:</strong> <span id="lastUpdate">-</span></p>
             <div class="form-row">
                 <button onclick="updateInterest()" class="btn-success">🔄 Update Interest</button>
@@ -283,17 +283,29 @@
 
     <script>
     let loan = JSON.parse(localStorage.getItem('loan')) || { 
-        name: '', principal: 0, originalPrincipal: 0, totalLent: 0, rate: 0, 
-        startDate: new Date().toISOString().split('T')[0], 
-        lastUpdate: new Date().toISOString(), history: [], totalInterest: 0, 
-        totalRepayments: 0, monthlyInterest: {}
+        name: '',
+        principal: 0,
+        originalPrincipal: 0,
+        totalLent: 0,
+        rate: 0,
+        startDate: new Date().toISOString().split('T')[0],
+        lastUpdate: new Date().toISOString(),
+        history: [],
+        totalInterest: 0,
+        totalRepayments: 0,
+        // overdraft-style: track daily interest if needed
+        dailyInterest: {}
     };
+
     let showDetailedView = false;
     let pieChart = null;
 
     function formatINR(amount) {
         return new Intl.NumberFormat('en-IN', { 
-            style: 'currency', currency: 'INR', minimumFractionDigits: 0, maximumFractionDigits: 0 
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0 
         }).format(amount);
     }
 
@@ -305,63 +317,65 @@
 
     function saveLoan() {
         localStorage.setItem('loan', JSON.stringify(loan));
-        updateDisplay();
     }
 
     function setupLoan() {
-        loan.name = document.getElementById('loanName').value.trim();
-        loan.rate = parseFloat(document.getElementById('rate').value) || 0;
+        const name = document.getElementById('loanName').value.trim();
+        const rateVal = parseFloat(document.getElementById('rate').value);
+
+        if (!name) {
+            alert('Please enter a name for the loan.');
+            return;
+        }
+        if (isNaN(rateVal) || rateVal < 0) {
+            alert('Please enter a valid non-negative interest rate.');
+            return;
+        }
+
+        loan.name = name;
+        loan.rate = rateVal;
         loan.startDate = new Date().toISOString();
         loan.lastUpdate = new Date().toISOString();
         saveLoan();
+        updateDisplay();
     }
 
-    // Updated: Monthly compounding on 1st of each month
+    // Overdraft-style: daily interest on outstanding balance
     function calcInterest(targetDate = new Date()) {
-        const lastDate = new Date(loan.lastUpdate);
-        const monthlyRate = loan.rate / 100 / 12; // r/12 [web:10]
+        const to = new Date(targetDate);
+        let from = new Date(loan.lastUpdate);
 
-        // Find next compounding date (1st of current/next month)
-        let currentMonthStart = new Date(lastDate.getFullYear(), lastDate.getMonth(), 1);
-        let targetMonthStart = new Date(targetDate.getFullYear(), targetDate.getMonth(), 1);
+        // Normalize times to midnight
+        from.setHours(0, 0, 0, 0);
+        to.setHours(0, 0, 0, 0);
 
-        // Calculate full months to compound
-        let monthsDiff = (targetMonthStart.getFullYear() - currentMonthStart.getFullYear()) * 12 + 
-                         (targetMonthStart.getMonth() - currentMonthStart.getMonth());
-
-        if (monthsDiff > 0 && loan.rate > 0 && loan.principal > 0) {
-            let interestAdded = 0;
-            const monthKeys = [];
-
-            for (let i = 0; i < monthsDiff; i++) {
-                const interest = loan.principal * monthlyRate;
-                loan.principal += interest;
-                interestAdded += interest;
-
-                // Track per month
-                const monthDate = new Date(currentMonthStart.getFullYear(), currentMonthStart.getMonth() + i + 1, 1);
-                const monthKey = monthDate.toISOString().slice(0, 7);
-                loan.monthlyInterest[monthKey] = (loan.monthlyInterest[monthKey] || 0) + interest;
-                monthKeys.push(monthKey);
-            }
-
-            loan.totalInterest += interestAdded;
-            loan.lastUpdate = targetMonthStart.toISOString();
-
-            // Add compounding history entry if detailed view
-            if (showDetailedView || Object.keys(loan.monthlyInterest).length === 1) {
-                loan.history.push({
-                    date: targetMonthStart.toISOString(),
-                    type: 'interest',
-                    amount: 0,
-                    interest: interestAdded.toFixed(2),
-                    balance: loan.principal.toFixed(2),
-                    comment: `Monthly Compounding (${monthsDiff} months)`
-                });
-            }
-
-            saveLoan();
+        // If targetDate <= lastUpdate, nothing to do
+        if (to <= from) {
+            return;
         }
+
+        const annualRate = loan.rate / 100;   // e.g. 18% -> 0.18
+        const dailyRate = annualRate / 365;   // basic 365-day convention
+
+        let runningDate = new Date(from.getTime());
+
+        while (runningDate < to) {
+            const dayKey = runningDate.toISOString().slice(0, 10); // YYYY-MM-DD
+
+            if (loan.principal > 0 && loan.rate > 0) {
+                const interestForDay = loan.principal * dailyRate;
+
+                loan.principal += interestForDay;
+                loan.totalInterest += interestForDay;
+
+                loan.dailyInterest[dayKey] = (loan.dailyInterest[dayKey] || 0) + interestForDay;
+            }
+
+            runningDate.setDate(runningDate.getDate() + 1);
+        }
+
+        loan.lastUpdate = to.toISOString();
+        saveLoan();
     }
 
     function updateInterest() {
@@ -372,47 +386,55 @@
     function addTransaction() {
         const transDateInput = document.getElementById('transDate').value;
         const transDate = transDateInput ? new Date(transDateInput + 'T00:00:00') : new Date();
-        
-        // Compound up to transaction date first
+
+        // Accrue interest up to this transaction date
         calcInterest(transDate);
-        
+
         const type = document.getElementById('type').value;
-        const amount = parseFloat(document.getElementById('amount').value) || 0;
+        const amountVal = parseFloat(document.getElementById('amount').value);
         const comment = document.getElementById('comment').value.trim() || '';
-        
+
+        if (isNaN(amountVal) || amountVal <= 0) {
+            alert('Please enter a valid amount greater than 0.');
+            return;
+        }
+
         if (type === 'redisbursal') {
-            loan.principal += amount;
-            loan.totalLent += amount;
+            loan.principal += amountVal;
+            loan.totalLent += amountVal;
             if (loan.originalPrincipal === 0) {
-                loan.originalPrincipal = amount;
+                loan.originalPrincipal = amountVal;
             }
         } else {
-            loan.principal -= amount;
-            loan.totalRepayments += amount;
+            // repayment
+            loan.principal -= amountVal;
+            loan.totalRepayments += amountVal;
+
             if (loan.principal < 0) {
-                loan.totalRepayments += loan.principal;
-                loan.principal = 0;
+                loan.principal = 0; // cap at zero; overpayment not tracked separately
             }
         }
-        
+
         loan.history.push({
             date: transDate.toISOString(),
             type: type,
-            amount: amount.toFixed(2),
-            interest: '0.00',
+            amount: amountVal.toFixed(2),
+            interest: '0.00', // interest already applied via calcInterest
             balance: loan.principal.toFixed(2),
             comment: comment
         });
+
         loan.lastUpdate = transDate.toISOString();
-        
+
         // Clear form
         document.getElementById('amount').value = '';
         document.getElementById('comment').value = '';
         document.getElementById('transDate').value = '';
+
         saveLoan();
+        updateDisplay();
     }
 
-    // Rest of functions unchanged (toggleMonthlyView, updateDisplay, etc.)
     function toggleMonthlyView() {
         showDetailedView = !showDetailedView;
         document.getElementById('monthlyToggle').textContent = showDetailedView ? 
@@ -421,23 +443,27 @@
     }
 
     function updateDisplay() {
-        calcInterest(new Date());  // Ensure up-to-date on load
-        
+        // always bring interest current to today when showing dashboard
+        calcInterest(new Date());
+
         document.getElementById('currentPrincipal').textContent = formatINR(loan.principal);
         document.getElementById('totalInterest').textContent = formatINR(loan.totalInterest);
         document.getElementById('totalRepayments').textContent = formatINR(loan.totalRepayments);
         document.getElementById('totalLentAmount').textContent = formatINR(loan.totalLent);
         document.getElementById('currentLoanName').textContent = loan.name || 'No loan set';
-        
-        const monthlyRate = loan.rate / 100 / 12 * 100;
-        document.getElementById('dailyRate').textContent = `${monthlyRate.toFixed(4)}% (monthly)`;  // Updated label
-        document.getElementById('lastUpdate').textContent = new Date(loan.lastUpdate).toLocaleDateString('en-IN');
-        
+
+        const annualRatePct = loan.rate;
+        const dailyRatePct = loan.rate ? (loan.rate / 365).toFixed(4) : '0.0000';
+        document.getElementById('dailyRate').textContent =
+            `${dailyRatePct}% per day (Annual: ${annualRatePct.toFixed ? annualRatePct.toFixed(2) : annualRatePct}%)`;
+
+        document.getElementById('lastUpdate').textContent =
+            new Date(loan.lastUpdate).toLocaleDateString('en-IN');
+
         updatePieChart();
         updateHistoryTable();
     }
 
-    // ... (keep all other functions like updatePieChart, updateHistoryTable, exportData, etc. exactly as before)
     function updatePieChart() {
         const ctx = document.getElementById('pieChart').getContext('2d');
         if (pieChart) pieChart.destroy();
@@ -478,35 +504,52 @@
         });
     }
 
+    // Monthly-style overview using dailyInterest aggregation
     function getMonthlyHistory() {
         const monthly = [];
-        Object.entries(loan.monthlyInterest).forEach(([monthKey, interest]) => {
+
+        // aggregate daily interest into months
+        const monthlyMap = {}; // { 'YYYY-MM': { interest, lastBalance } }
+
+        Object.entries(loan.dailyInterest).forEach(([dayKey, interest]) => {
+            const monthKey = dayKey.slice(0, 7); // YYYY-MM
+            if (!monthlyMap[monthKey]) {
+                monthlyMap[monthKey] = { interest: 0, lastBalance: 0 };
+            }
+            monthlyMap[monthKey].interest += interest;
+            // using current principal as approximation; to be more precise, you'd store daily balances too
+            monthlyMap[monthKey].lastBalance = loan.principal;
+        });
+
+        Object.entries(monthlyMap).forEach(([monthKey, data]) => {
             const date = new Date(monthKey + '-01');
             monthly.push({
                 date: date.toISOString(),
                 type: 'interest',
                 amount: 0,
-                interest: interest.toFixed(2),
-                balance: loan.principal.toFixed(2),
+                interest: data.interest.toFixed(2),
+                balance: data.lastBalance.toFixed(2),
                 comment: `Monthly Interest (${monthKey})`
             });
         });
-        loan.history.filter(h => h.type !== 'interest').forEach(entry => {
-            monthly.push(entry);
-        });
+
+        // Add all principal transactions
+        loan.history
+            .filter(h => h.type !== 'interest')
+            .forEach(entry => monthly.push(entry));
+
         return monthly.sort((a, b) => new Date(b.date) - new Date(a.date));
     }
 
     function getTypeIcon(type) {
         const icons = {
-            'interest': '📈 Monthly Interest',
+            'interest': '📈 Interest',
             'redisbursal': '➕ Lent Money', 
             'repayment': '➖ Received'
         };
         return icons[type] || type;
     }
 
-    // Keep all export/import/clear functions unchanged...
     function exportData() {
         const dataStr = JSON.stringify(loan, null, 2);
         download(dataStr, `family-loan-${loan.name || 'tracker'}.json`);
@@ -515,7 +558,7 @@
     function exportHistory() {
         let csv = 'Date,Type,Amount,Interest,Balance,Notes\n';
         loan.history.forEach(entry => {
-            csv += `"${new Date(entry.date).toLocaleString('en-IN')}",${entry.type},"${entry.amount}","${entry.interest}","${entry.balance}","${entry.comment.replace(/"/g, '""')}"\n`;
+            csv += `"${new Date(entry.date).toLocaleString('en-IN')}",${entry.type},"${entry.amount}","${entry.interest}","${entry.balance}","${(entry.comment || '').replace(/"/g, '""')}"\n`;
         });
         download(csv, `family-loan-history-${loan.name || 'tracker'}.csv`);
     }
@@ -528,7 +571,23 @@
         if (file) {
             const reader = new FileReader();
             reader.onload = e => {
-                loan = JSON.parse(e.target.result);
+                const imported = JSON.parse(e.target.result);
+
+                // Basic migration: ensure new fields exist
+                loan = {
+                    name: imported.name || '',
+                    principal: imported.principal || 0,
+                    originalPrincipal: imported.originalPrincipal || 0,
+                    totalLent: imported.totalLent || 0,
+                    rate: imported.rate || 0,
+                    startDate: imported.startDate || new Date().toISOString().split('T')[0],
+                    lastUpdate: imported.lastUpdate || new Date().toISOString(),
+                    history: imported.history || [],
+                    totalInterest: imported.totalInterest || 0,
+                    totalRepayments: imported.totalRepayments || 0,
+                    dailyInterest: imported.dailyInterest || {}
+                };
+
                 saveLoan();
                 updateDisplay();
             };
@@ -537,28 +596,40 @@
     }
 
     function handleCSVImport(event) {
-        // Unchanged CSV import logic
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = e => {
                 const csv = e.target.result;
                 const lines = csv.split('\n').slice(1);
+                let importedCount = 0;
+
                 lines.forEach(line => {
                     if (line.trim()) {
-                        const [dateStr, type, amountStr] = line.split(',');
+                        const cols = line.split(',');
+                        const dateStr = cols[0].replace(/"/g, '');
+                        const type = cols[1];
+                        const amountStr = cols[2];
+
                         if (type && amountStr) {
                             const transDate = new Date(dateStr);
-                            const amount = parseFloat(amountStr.replace(/[₹,]/g, ''));
+                            const amount = parseFloat(amountStr.replace(/[₹,"]/g, ''));
+
                             if (!isNaN(transDate) && !isNaN(amount) && type !== 'interest') {
-                                calcInterest(transDate);  // Compound before import trans
+                                // accrue interest up to this imported transaction date
+                                calcInterest(transDate);
+
                                 if (type === 'redisbursal') {
                                     loan.principal += amount;
                                     loan.totalLent += amount;
                                 } else {
                                     loan.principal -= amount;
                                     loan.totalRepayments += amount;
+                                    if (loan.principal < 0) {
+                                        loan.principal = 0;
+                                    }
                                 }
+
                                 loan.history.push({
                                     date: transDate.toISOString(),
                                     type: type,
@@ -567,14 +638,17 @@
                                     balance: loan.principal.toFixed(2),
                                     comment: ''
                                 });
+
+                                importedCount++;
                             }
                         }
                     }
                 });
+
                 loan.lastUpdate = new Date().toISOString();
                 saveLoan();
                 updateDisplay();
-                alert(`Imported ${lines.length} transactions`);
+                alert(`Imported ${importedCount} transactions`);
             };
             reader.readAsText(file);
         }
@@ -584,10 +658,17 @@
         if (confirm('Clear all family loan data? This cannot be undone.')) {
             localStorage.removeItem('loan');
             loan = { 
-                name: '', principal: 0, originalPrincipal: 0, totalLent: 0, rate: 0, 
-                startDate: new Date().toISOString().split('T')[0], 
-                lastUpdate: new Date().toISOString(), history: [], totalInterest: 0, 
-                totalRepayments: 0, monthlyInterest: {}
+                name: '',
+                principal: 0,
+                originalPrincipal: 0,
+                totalLent: 0,
+                rate: 0,
+                startDate: new Date().toISOString().split('T')[0],
+                lastUpdate: new Date().toISOString(),
+                history: [],
+                totalInterest: 0,
+                totalRepayments: 0,
+                dailyInterest: {}
             };
             updateDisplay();
         }
@@ -603,10 +684,9 @@
         URL.revokeObjectURL(url);
     }
 
+    // Default transaction date = today
     document.getElementById('transDate').valueAsDate = new Date();
     updateDisplay();
-</script>
-    
-
+    </script>
 </body>
 </html>
