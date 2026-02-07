@@ -267,13 +267,17 @@
       </div>
     </div>
   </div>
-  <script>
-     // Import the functions you need from the SDKs you need
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
-    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
-    
-    // Firebase Config for vaibhav-s-ledger
-    const firebaseConfig = {
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
     apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
     authDomain: "vaibhav-s-ledger.firebaseapp.com",
     databaseURL: "https://vaibhav-s-ledger-default-rtdb.firebaseio.com",
@@ -281,11 +285,34 @@
     storageBucket: "vaibhav-s-ledger.firebasestorage.app",
     messagingSenderId: "199650798840",
     appId: "1:199650798840:web:06ff1415dd60a603f39f0d",
-    measurementId: "G-LYEZTLM2Y6"    };
+    measurementId: "G-LYEZTLM2Y6"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+ const db = firebase.database();
+/script>
+  
+  <script>
+     // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+    
+    // Firebase Config for vaibhav-s-ledger
+   //AV: const firebaseConfig = {
+  //AV:apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
+   //AV: authDomain: "vaibhav-s-ledger.firebaseapp.com",
+   //AV: databaseURL: "https://vaibhav-s-ledger-default-rtdb.firebaseio.com",
+    //AV:projectId: "vaibhav-s-ledger",
+    //AV:storageBucket: "vaibhav-s-ledger.firebasestorage.app",
+    //AV:messagingSenderId: "199650798840",
+    //AV:appId: "1:199650798840:web:06ff1415dd60a603f39f0d",
+    //AV:measurementId: "G-LYEZTLM2Y6"    };
     
     // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    //AV:firebase.initializeApp(firebaseConfig);
+   //AV: const db = firebase.database();
     
     // Get loan ID from URL (?loan=abc123) or use default
     const urlParams = new URLSearchParams(window.location.search);
