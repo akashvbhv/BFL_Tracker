@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vaibhav's Ledger</title>
+  <title>Ledger Management System</title>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playball&display=swap" rel="stylesheet">
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -17,152 +20,189 @@
       --dark: #2c3e50;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    
     body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: var(--dark); }
+
+    /* Banner */
+    .title-banner { background: rgba(255, 255, 255, 0.95); margin: 0 auto 25px auto; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 1300px; }
+    .title-banner h1 { font-family: 'Dancing Script', cursive; font-size: 3.5em; font-weight: 700; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+    .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
     
-    .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
+    /* Sidebar Styling */
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
     
-    /* Sidebar */
-    .sidebar { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; }
-    .sidebar h2 { font-size: 1.1em; margin-bottom: 15px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; text-transform: uppercase; }
-    .person-item { padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 8px; border: 1px solid transparent; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .person-item:hover { background: #f8fafc; border-color: var(--primary); }
-    .person-item.active { background: var(--primary); color: white; font-weight: bold; }
+    .sidebar-section { background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .sidebar h2 { font-size: 0.9em; margin-bottom: 12px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
     
-    /* Main Content */
+    /* Uniform Tab Style */
+    .tab-btn { 
+      padding: 14px; border-radius: 10px; cursor: pointer; border: none; width: 100%; 
+      font-weight: 600; font-size: 0.95em; transition: 0.3s; display: flex; 
+      justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+
+    .intro-tab { background: var(--info); color: white; margin-bottom: 0; }
+    .intro-tab:hover { background: #2980b9; transform: translateY(-2px); }
+
+    .person-item { background: white; color: var(--dark); border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .person-item:hover { border-color: var(--primary); transform: translateX(5px); }
+    .person-item.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
+
+    /* New Member Tab/Form */
+    .new-member-form { display: flex; flex-direction: column; gap: 10px; }
+    .new-member-form input { background: white; border: 2px solid #e8ecf4; }
+    .btn-create { background: var(--success); color: white; margin-top: 5px; }
+
+    /* Content Views */
     .main-content { display: flex; flex-direction: column; gap: 20px; }
+    .section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .protected-content, #authOverlay, #introView { display: none; flex-direction: column; gap: 20px; }
 
-    /* Pie Chart Hero */
-    .hero-section { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .hero-section h2 { font-size: 1.2em; margin-bottom: 10px; color: var(--secondary); }
-    .chart-container { height: 220px; width: 100%; max-width: 400px; }
+    #introView { display: flex; }
+    .guide-step { margin-bottom: 20px; padding-left: 15px; border-left: 4px solid var(--info); }
+    .guide-step h4 { color: var(--secondary); margin-bottom: 5px; }
 
-    /* Dashboard Cards */
-    .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
-    .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 4px solid #eee; }
+    /* Auth Overlay */
+    #authOverlay { background: white; border-radius: 15px; padding: 50px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); align-items: center; }
+    #authOverlay input { max-width: 300px; text-align: center; font-size: 1.2em; margin: 20px 0; }
+
+    /* Dashboard */
+    .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+    .card { background: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid #eee; }
     .card .val { font-size: 1.5em; font-weight: 700; margin: 5px 0; }
-    .card .label { font-size: 0.75em; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
-    .card.c1 { border-color: var(--danger); } 
-    .card.c2 { border-color: var(--info); }   
-    .card.c3 { border-color: var(--success); } 
-    .card.c4 { border-color: var(--warning); } 
+    
+    input, select, button, textarea { width: 100%; padding: 12px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; transition: 0.2s; }
+    input:focus { border-color: var(--primary); }
+    button { cursor: pointer; font-weight: 600; border: none; }
 
-    .section { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-    .section h3 { font-size: 1.1em; color: var(--secondary); border-left: 4px solid var(--primary); padding-left: 10px; }
-    
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
-    
-    label { display: block; margin-bottom: 5px; font-size: 0.85em; font-weight: 600; color: #666; }
-    input, select, button { width: 100%; padding: 10px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; font-size: 0.9em; }
-    
-    button { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
-
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
-    th { background: #f8fafc; color: #7f8c8d; text-transform: uppercase; font-size: 0.75em; }
     .type-emi { color: var(--secondary); font-weight: 600; background: #f4f0fa; }
-    
-    .btn-group { display: flex; gap: 5px; }
-    .btn-edit { background: var(--info); padding: 5px; font-size: 0.8em; }
-    .btn-del { background: var(--danger); padding: 5px; font-size: 0.8em; }
-    .btn-csv { background: #555; width: auto; padding: 8px 15px; }
-    .btn-import { background: #27ae60; width: auto; padding: 8px 15px; }
+    .btn-edit { background: var(--info); padding: 5px 10px; border-radius: 4px; color: white; width: auto; }
+    .btn-del { background: var(--danger); padding: 5px 10px; border-radius: 4px; color: white; width: auto; }
 
-    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } .section-header { flex-direction: column; align-items: flex-start; gap: 10px; } .section-header button { width: 100%; } }
+    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } }
   </style>
 </head>
 <body>
 
+<div class="title-banner">
+    <h1>Ledger Management System</h1>
+</div>
+
 <div class="container">
-  <!-- Sidebar -->
   <div class="sidebar">
-    <h2>Members</h2>
-    <div id="personList"></div>
-    <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-    <input type="text" id="newPersonName" placeholder="New Member Name" style="margin-bottom: 8px;">
-    <button onclick="addNewPerson()" style="background: var(--success);">Add Member</button>
+    <!-- Intro Tab -->
+    <div class="sidebar-section">
+      <button class="tab-btn intro-tab" onclick="showIntroduction()">📖 Quick Guide <span>➔</span></button>
+    </div>
+    
+    <!-- Members Tab -->
+    <div class="sidebar-section">
+      <h2>Active Members</h2>
+      <div id="personList"></div>
+    </div>
+    
+    <!-- Add Member Tab -->
+    <div class="sidebar-section">
+      <h2>New Member Profile</h2>
+      <div class="new-member-form">
+        <input type="text" id="newPersonName" placeholder="Full Name">
+        <input type="password" id="newPersonPass" placeholder="Personal Password">
+        <button class="tab-btn btn-create" onclick="addNewPerson()">Create Profile +</button>
+      </div>
+    </div>
   </div>
 
-  <!-- Main Content -->
   <div class="main-content">
     
-    <!-- Top Hero Section -->
-    <div class="hero-section">
-      <h2 id="heroTitle">Loan Breakdown</h2>
-      <div class="chart-container">
-        <canvas id="loanPieChart"></canvas>
-      </div>
+    <!-- INTRODUCTION VIEW -->
+    <div id="introView" class="section">
+        <h3>Mastering the Ledger System</h3>
+        <p style="margin-bottom: 20px; color: #666;">This application follows the <b>Bajaj Finserv Overdraft</b> financial logic: Daily interest accrual with monthly capitalization.</p>
+        
+        <div class="guide-step">
+            <h4>1. Member Creation</h4>
+            <p>Add members in the sidebar. Note: Adding or Deleting members requires the <b>Master Password</b> to prevent data loss.</p>
+        </div>
+        <div class="guide-step">
+            <h4>2. Daily Interest Calculation</h4>
+            <p>Interest is calculated every 24 hours based on the closing principal balance using the Global Rate set in the ledger.</p>
+        </div>
+        <div class="guide-step">
+            <h4>3. EMI on Interest (Compounding)</h4>
+            <p>On the 1st of every month, the accumulated daily interest is converted into an <b>EMI on Interest</b> entry and added to the principal balance.</p>
+        </div>
+        <div class="guide-step">
+            <h4>4. Corrections & Recalculation</h4>
+            <p>If you edit an entry from the past, the system will instantly re-process the entire timeline to ensure the current balance is 100% accurate.</p>
+        </div>
     </div>
 
-    <!-- Dashboard -->
-    <div class="card-row">
-      <div class="card c1"><div class="label">Outstanding</div><div class="val" id="statBalance" style="color: var(--danger);">₹0</div></div>
-      <div class="card c2"><div class="label">Amount Received</div><div class="val" id="statReceived" style="color: var(--info);">₹0</div></div>
-      <div class="card c3"><div class="label">Amount  Sent</div><div class="val" id="statSent" style="color: var(--success);">₹0</div></div>
-      <div class="card c4"><div class="label">Interest Accured</div><div class="val" id="statInterest" style="color: var(--warning);">₹0</div></div>
+    <!-- AUTH OVERLAY -->
+    <div id="authOverlay" class="section">
+        <span style="font-size: 4em;">🔒</span>
+        <h2 id="authMemberName">Select a Member</h2>
+        <p>This ledger is password protected.</p>
+        <input type="password" id="sessionPassInput" placeholder="••••">
+        <button onclick="unlockMember()" style="padding: 15px 40px; font-size: 1.1em; background: var(--secondary);">Unlock Ledger</button>
     </div>
 
-    <!-- Rate Settings -->
-    <div class="section">
-      <h3>Loan Settings</h3>
-      <div class="form-grid">
-        <div style="flex: 2;">
-          <label>Global Annual Interest Rate (%)</label>
-          <input type="number" id="globalRate" step="0.01" placeholder="12.00">
+    <!-- LEDGER CONTENT -->
+    <div id="protectedArea" class="protected-content">
+        <div class="section" style="text-align: center;">
+            <h2 id="heroTitle">Breakdown</h2>
+            <div style="height: 220px; max-width: 450px; margin: 0 auto;"><canvas id="loanPieChart"></canvas></div>
         </div>
-        <button onclick="updateSettings()" style="background: var(--secondary);">Update Rate</button>
-      </div>
-    </div>
 
-    <!-- Entry Form & Import -->
-    <div class="section">
-      <div class="section-header">
-        <h3 id="formTitle">Add Transaction</h3>
-        <button onclick="document.getElementById('csvFileInput').click()" class="btn-import">Import CSV</button>
-        <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVImport(event)">
-      </div>
-      <div class="form-grid">
-        <div>
-          <label>Type</label>
-          <select id="tType">
-            <option value="lent">I Lent Money (+)</option>
-            <option value="received">I Received Money (-)</option>
-          </select>
+        <div class="card-row">
+          <div class="card" style="border-color: var(--danger);"><div class="val" id="statBalance" style="color: var(--danger);">₹0</div><div style="font-size: 0.8em; color: #777;">OUTSTANDING</div></div>
+          <div class="card" style="border-color: var(--info);"><div class="val" id="statReceived" style="color: var(--info);">₹0</div><div style="font-size: 0.8em; color: #777;">RECEIVED</div></div>
+          <div class="card" style="border-color: var(--success);"><div class="val" id="statSent" style="color: var(--success);">₹0</div><div style="font-size: 0.8em; color: #777;">SENT</div></div>
+          <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.8em; color: #777;">EMI ACCRUED</div></div>
         </div>
-        <div>
-          <label>Amount (₹)</label>
-          <input type="number" id="tAmount" placeholder="0.00">
-        </div>
-        <div>
-          <label>Date</label>
-          <input type="date" id="tDate">
-        </div>
-        <input type="hidden" id="editIdx" value="-1">
-        <button onclick="handleTransaction()" id="submitBtn">Save Entry</button>
-      </div>
-    </div>
 
-    <!-- History & Export -->
-    <div class="section">
-      <div class="section-header">
-        <h3>Transaction History</h3>
-        <button onclick="exportToCSV()" class="btn-csv">Export History (CSV)</button>
-      </div>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Closing Balance</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="historyBody"></tbody>
-        </table>
-      </div>
+        <div class="section" style="background: #f4f7ff; border: 1px solid #d0d7de;">
+            <h3>Security Settings</h3>
+            <div class="form-grid">
+                <div><label>New Password</label><input type="password" id="changePassInput"></div>
+                <button onclick="changeMemberPassword()" style="background: var(--info);">Update Password</button>
+                <button onclick="deleteMemberPassword()" style="background: var(--danger);">Remove Lock</button>
+            </div>
+        </div>
+
+        <div class="section">
+          <h3>Interest Settings</h3>
+          <div class="form-grid">
+            <div style="grid-column: span 2;"><label>Global Annual Rate (%)</label><input type="number" id="globalRate" step="0.01"></div>
+            <button onclick="updateSettings()" style="background: var(--secondary);">Update Rate</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>New Transaction</h3>
+            <button onclick="document.getElementById('csvFileInput').click()" style="background: #27ae60; width: auto; padding: 8px 15px; font-size: 0.8em;">Import CSV</button>
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVImport(event)">
+          </div>
+          <div class="form-grid">
+            <div><label>Type</label><select id="tType"><option value="lent">I Lent Money (+)</option><option value="received">I Received Money (-)</option></select></div>
+            <div><label>Amount (₹)</label><input type="number" id="tAmount" placeholder="0.00"></div>
+            <div><label>Date</label><input type="date" id="tDate"></div>
+            <div style="grid-column: span 2;"><label>Notes</label><textarea id="tComment" placeholder="Details..." rows="1" style="height:44px"></textarea></div>
+            <input type="hidden" id="editIdx" value="-1">
+            <button onclick="handleTransaction()" id="submitBtn">Save Entry</button>
+          </div>
+        </div>
+
+        <div class="section">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3>History</h3>
+            <button onclick="exportToCSV()" style="background: #555; width: auto; padding: 8px 15px; font-size: 0.8em;">Export CSV</button>
+          </div>
+          <div style="overflow-x: auto;"><table><thead><tr><th>Date</th><th>Type</th><th>Amount</th><th>Balance</th><th>Notes</th><th>Actions</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+        </div>
     </div>
   </div>
 </div>
@@ -185,17 +225,23 @@
   let currentPersonId = null;
   let allPeople = {};
   let myPieChart = null;
+  let unlockedSessions = {}; 
+
+  const MASTER_HASH = "103322472b83445693630f5b9997637841f32a7620a2e724734661853406f0e9"; // Akash#8995
+
+  async function hashString(str) {
+    if (!str) return "";
+    const utf8 = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
 
   function init() {
     document.getElementById('tDate').valueAsDate = new Date();
     db.ref('ledger').on('value', snap => {
       allPeople = snap.val() || {};
       renderPersonList();
-      if (!currentPersonId && Object.keys(allPeople).length > 0) {
-        selectPerson(Object.keys(allPeople)[0]);
-      } else if (currentPersonId) {
-        updateUI();
-      }
+      if (currentPersonId) checkAuthAndRender();
     });
   }
 
@@ -203,179 +249,138 @@
     const list = document.getElementById('personList');
     list.innerHTML = '';
     Object.keys(allPeople).forEach(id => {
+      const hasPass = !!allPeople[id].password;
+      const isUnlocked = unlockedSessions[id] || !hasPass;
       const div = document.createElement('div');
-      div.className = `person-item ${id === currentPersonId ? 'active' : ''}`;
-      div.innerText = allPeople[id].name;
-      div.onclick = () => selectPerson(id);
+      div.className = `tab-btn person-item ${id === currentPersonId ? 'active' : ''}`;
+      div.innerHTML = `
+        <span onclick="selectPerson('${id}')" style="flex-grow:1; text-align:left;">${allPeople[id].name} ${isUnlocked ? '🔓' : '🔒'}</span>
+        <span onclick="deleteMemberProfile(event, '${id}')" style="color:var(--danger); margin-left:10px;">🗑️</span>
+      `;
       list.appendChild(div);
     });
   }
 
+  function showIntroduction() {
+      currentPersonId = null;
+      document.getElementById('introView').style.display = 'flex';
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('protectedArea').style.display = 'none';
+      renderPersonList();
+  }
+
   function selectPerson(id) {
     currentPersonId = id;
-    document.getElementById('heroTitle').innerText = allPeople[id].name + "'s Breakdown";
-    resetForm();
+    document.getElementById('introView').style.display = 'none';
     renderPersonList();
-    updateUI();
+    checkAuthAndRender();
   }
 
-  function addNewPerson() {
+  async function addNewPerson() {
     const name = document.getElementById('newPersonName').value.trim();
-    if (!name) return;
-    db.ref('ledger').push({ name: name, globalRate: 0, transactions: [] });
+    const pass = document.getElementById('newPersonPass').value.trim();
+    if (!name) return alert("Name is required.");
+
+    const masterPrompt = prompt("Enter MASTER PASSWORD to create profile:");
+    if (await hashString(masterPrompt) !== MASTER_HASH) return alert("Master password incorrect.");
+
+    const hp = pass ? await hashString(pass) : "";
+    db.ref('ledger').push({ name, password: hp, globalRate: 0, transactions: [] });
     document.getElementById('newPersonName').value = '';
+    document.getElementById('newPersonPass').value = '';
   }
 
-  function updateSettings() {
-    const rate = parseFloat(document.getElementById('globalRate').value);
-    if (isNaN(rate)) return alert("Invalid Rate");
-    db.ref(`ledger/${currentPersonId}/globalRate`).set(rate);
+  async function deleteMemberProfile(e, id) {
+      e.stopPropagation();
+      const masterPrompt = prompt("Enter MASTER PASSWORD to delete profile:");
+      if (await hashString(masterPrompt) === MASTER_HASH) {
+          if (confirm("Permanently delete data for " + allPeople[id].name + "?")) db.ref(`ledger/${id}`).remove();
+      } else alert("Master password incorrect.");
   }
 
-  // --- CSV LOGIC ---
-  function exportToCSV() {
+  async function checkAuthAndRender() {
+    const overlay = document.getElementById('authOverlay');
+    const content = document.getElementById('protectedArea');
+    if (!currentPersonId) return;
+
     const person = allPeople[currentPersonId];
-    if (!person || !person.transactions) return alert("No transactions to export");
-    const userTrans = person.transactions.filter(t => t.type !== 'interest_emi');
-    let csvContent = "data:text/csv;charset=utf-8,Date,Type,Amount\n";
-    userTrans.forEach(t => { csvContent += `${t.date},${t.type},${t.amount}\n`; });
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${person.name}_ledger.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!person.password) unlockedSessions[currentPersonId] = true;
+
+    if (unlockedSessions[currentPersonId]) {
+      overlay.style.display = 'none'; content.style.display = 'flex';
+      document.getElementById('heroTitle').innerText = person.name + "'s Ledger";
+      updateUI();
+    } else {
+      overlay.style.display = 'flex'; content.style.display = 'none';
+      document.getElementById('authMemberName').innerText = person.name;
+    }
   }
 
-  function handleCSVImport(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      const text = e.target.result;
-      const lines = text.split('\n');
-      const importedTrans = [];
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(',');
-        if (cols.length < 3) continue;
-        const date = cols[0].trim();
-        const type = cols[1].trim();
-        const amount = parseFloat(cols[2]);
-        if (date && (type === 'lent' || type === 'received') && !isNaN(amount)) {
-          importedTrans.push({ id: 'T' + Date.now() + i, date, type, amount });
-        }
-      }
-      if (importedTrans.length > 0) {
-        if (confirm(`Import ${importedTrans.length} transactions? This will overwrite existing records.`)) {
-          db.ref(`ledger/${currentPersonId}/transactions`).set(importedTrans);
-        }
-      } else { alert("No valid transactions found."); }
-    };
-    reader.readAsText(file);
-    event.target.value = '';
+  async function unlockMember() {
+    const typed = document.getElementById('sessionPassInput').value;
+    const hashed = await hashString(typed);
+    if (hashed === allPeople[currentPersonId].password || hashed === MASTER_HASH) {
+      unlockedSessions[currentPersonId] = true;
+      checkAuthAndRender();
+    } else alert("Incorrect password.");
   }
 
-  // --- CALCULATION ENGINE ---
+  // --- CALC ENGINE ---
   function updateUI() {
-    if (!currentPersonId || !allPeople[currentPersonId]) return;
     const person = allPeople[currentPersonId];
     document.getElementById('globalRate').value = person.globalRate || 0;
-    
-    let userTransactions = (person.transactions || []).filter(t => t.type !== 'interest_emi');
-    userTransactions.sort((a,b) => new Date(a.date) - new Date(b.date));
-
-    let processedTimeline = [];
-    let runningBalance = 0;
-    let accumulatedInterest = 0;
-    let stats = { sent: 0, received: 0, interestPaid: 0 };
+    let userT = (person.transactions || []).filter(t => t.type !== 'interest_emi');
+    userT.sort((a,b) => new Date(a.date) - new Date(b.date));
+    let timeline = [], bal = 0, intAccum = 0, stats = {s:0, r:0, i:0};
     const rate = person.globalRate || 0;
 
-    if (userTransactions.length > 0) {
-      let firstDate = new Date(userTransactions[0].date);
-      let today = new Date();
-      today.setHours(23, 59, 59);
-      let currDate = new Date(firstDate);
-      currDate.setHours(0,0,0,0);
-
-      while (currDate <= today) {
-        if (currDate.getDate() === 1 && accumulatedInterest > 0) {
-          runningBalance += accumulatedInterest;
-          stats.interestPaid += accumulatedInterest;
-          processedTimeline.push({ date: currDate.toISOString().split('T')[0], type: 'interest_emi', amount: accumulatedInterest, balance: runningBalance });
-          accumulatedInterest = 0;
+    if (userT.length > 0) {
+      let curr = new Date(userT[0].date); curr.setHours(0,0,0,0);
+      let end = new Date(); end.setHours(23,59,59);
+      while (curr <= end) {
+        if (curr.getDate() === 1 && intAccum > 0) {
+          bal += intAccum; stats.i += intAccum;
+          timeline.push({ date: curr.toISOString().split('T')[0], type:'interest_emi', amount: intAccum, balance: bal, comment: 'EMI on Interest'});
+          intAccum = 0;
         }
-        let dayTransactions = userTransactions.filter(t => t.date === currDate.toISOString().split('T')[0]);
-        dayTransactions.forEach(t => {
-          if (t.type === 'lent') { runningBalance += t.amount; stats.sent += t.amount; }
-          else { runningBalance -= t.amount; stats.received += t.amount; }
-          processedTimeline.push({...t, balance: runningBalance});
+        userT.filter(t => t.date === curr.toISOString().split('T')[0]).forEach(t => {
+          if (t.type === 'lent') { bal += t.amount; stats.s += t.amount; }
+          else { bal -= t.amount; stats.r += t.amount; }
+          timeline.push({...t, balance: bal});
         });
-        if (runningBalance > 0 && rate > 0) accumulatedInterest += runningBalance * (rate / 100 / 365);
-        currDate.setDate(currDate.getDate() + 1);
+        if (bal > 0 && rate > 0) intAccum += bal * (rate / 100 / 365);
+        curr.setDate(curr.getDate() + 1);
       }
     }
-
-    document.getElementById('statBalance').innerText = '₹' + Math.round(runningBalance).toLocaleString();
-    document.getElementById('statReceived').innerText = '₹' + Math.round(stats.received).toLocaleString();
-    document.getElementById('statSent').innerText = '₹' + Math.round(stats.sent).toLocaleString();
-    document.getElementById('statInterest').innerText = '₹' + Math.round(stats.interestPaid).toLocaleString();
-    
-    updatePieChart(stats.sent, stats.interestPaid, stats.received);
-
-    const tbody = document.getElementById('historyBody');
-    tbody.innerHTML = '';
-    processedTimeline.reverse().forEach((t) => {
-      const row = tbody.insertRow();
-      if(t.type === 'interest_emi') row.className = 'type-emi';
-      row.innerHTML = `
-        <td>${t.date}</td>
-        <td>${t.type === 'lent' ? '➕ Principal Sent' : t.type === 'received' ? '➖ Repayment' : '💰 EMI on Interest'}</td>
-        <td>₹${Math.round(t.amount).toLocaleString()}</td>
-        <td>₹${Math.round(t.balance).toLocaleString()}</td>
-        <td>${t.type !== 'interest_emi' ? `
-          <div class="btn-group">
-            <button class="btn-edit" onclick="editEntry('${t.id}')">Edit</button>
-            <button class="btn-del" onclick="deleteEntry('${t.id}')">Del</button>
-          </div>` : '-'}</td>`;
+    document.getElementById('statBalance').innerText = '₹' + Math.round(bal).toLocaleString();
+    document.getElementById('statReceived').innerText = '₹' + Math.round(stats.r).toLocaleString();
+    document.getElementById('statSent').innerText = '₹' + Math.round(stats.s).toLocaleString();
+    document.getElementById('statInterest').innerText = '₹' + Math.round(stats.i).toLocaleString();
+    updatePie(stats.s, stats.i, stats.r);
+    const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
+    timeline.reverse().forEach(t => {
+      const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
+      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':'➖ Recv'}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button class="btn-edit" onclick="editEntry(\''+t.id+'\')">✏️</button> <button class="btn-del" onclick="deleteEntry(\''+t.id+'\')">🗑️</button>':'-'}</td>`;
     });
   }
 
-  function updatePieChart(sent, interest, received) {
+  function updatePie(s, i, r) {
     const ctx = document.getElementById('loanPieChart').getContext('2d');
     if (myPieChart) myPieChart.destroy();
-    myPieChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: ['Principal Sent', 'Interest EMI', 'Repayments'],
-        datasets: [{
-          data: [sent, interest, received],
-          backgroundColor: ['#00d4aa', '#f1c40f', '#3498db'],
-          borderWidth: 2, borderColor: '#ffffff'
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
-        cutout: '65%'
-      }
-    });
+    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
   }
 
   function handleTransaction() {
-    const type = document.getElementById('tType').value;
     const amount = parseFloat(document.getElementById('tAmount').value);
     const date = document.getElementById('tDate').value;
+    const comment = document.getElementById('tComment').value;
+    const type = document.getElementById('tType').value;
     const editId = document.getElementById('editIdx').value;
-    if (!amount || !date) return alert("Fill all fields");
+    if (!amount || !date) return alert("Fill data!");
     let person = allPeople[currentPersonId];
     if (!person.transactions) person.transactions = [];
-    if (editId === "-1") {
-      person.transactions.push({ id: 'T' + Date.now(), type, amount, date });
-    } else {
-      const idx = person.transactions.findIndex(t => t.id === editId);
-      person.transactions[idx] = { ...person.transactions[idx], type, amount, date };
-    }
+    if (editId === "-1") person.transactions.push({ id: 'T'+Date.now(), type, amount, date, comment });
+    else { const idx = person.transactions.findIndex(t => t.id === editId); person.transactions[idx] = { ...person.transactions[idx], type, amount, date, comment }; }
     db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
     resetForm();
   }
@@ -385,21 +390,63 @@
     document.getElementById('tType').value = entry.type;
     document.getElementById('tAmount').value = entry.amount;
     document.getElementById('tDate').value = entry.date;
+    document.getElementById('tComment').value = entry.comment || '';
     document.getElementById('editIdx').value = id;
-    document.getElementById('submitBtn').innerText = "Update Entry";
-    document.getElementById('formTitle').innerText = "Edit Transaction";
+    document.getElementById('submitBtn').innerText = "Update Record";
+    document.getElementById('formTitle').innerText = "Edit Record";
   }
 
   function deleteEntry(id) {
-    if (!confirm("Delete entry?")) return;
-    const newTrans = allPeople[currentPersonId].transactions.filter(t => t.id !== id);
-    db.ref(`ledger/${currentPersonId}/transactions`).set(newTrans);
+    if(!confirm("Delete entry?")) return;
+    db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
+  }
+
+  function updateSettings() {
+    db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value));
+  }
+
+  async function changeMemberPassword() {
+    const np = document.getElementById('changePassInput').value.trim();
+    if (!np) return alert("Type a password.");
+    db.ref(`ledger/${currentPersonId}/password`).set(await hashString(np));
+    alert("Password updated!");
+    document.getElementById('changePassInput').value = "";
+  }
+
+  function deleteMemberPassword() {
+    if (confirm("Remove password requirement?")) db.ref(`ledger/${currentPersonId}/password`).set("");
+  }
+
+  function exportToCSV() {
+    const p = allPeople[currentPersonId];
+    let csv = "Date,Type,Amount,Notes\n";
+    p.transactions.filter(t => t.type !== 'interest_emi').forEach(t => csv += `${t.date},${t.type},${t.amount},"${(t.comment||'').replace(/"/g, '""')}"\n`);
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    link.download = `${p.name}_ledger.csv`;
+    link.click();
+  }
+
+  function handleCSVImport(e) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const lines = ev.target.result.split('\n');
+      const imported = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        if (cols.length < 3) continue;
+        imported.push({ id: 'T'+Date.now()+i, date: cols[0].trim(), type: cols[1].trim(), amount: parseFloat(cols[2]), comment: cols[3]?.replace(/^"|"$/g, '') || '' });
+      }
+      db.ref(`ledger/${currentPersonId}/transactions`).set(imported);
+    };
+    reader.readAsText(e.target.files[0]);
   }
 
   function resetForm() {
     document.getElementById('tAmount').value = '';
+    document.getElementById('tComment').value = '';
     document.getElementById('editIdx').value = '-1';
-    document.getElementById('submitBtn').innerText = "Save Entry";
+    document.getElementById('submitBtn').innerText = "Save Record";
     document.getElementById('formTitle').innerText = "Add Transaction";
     document.getElementById('tDate').valueAsDate = new Date();
   }
