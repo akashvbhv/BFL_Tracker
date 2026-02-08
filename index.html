@@ -76,15 +76,16 @@
 
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
-    th { background: #f8fafc; color: #7f8c8d; text-transform: uppercase; font-size: 0.75em; cursor: pointer; position: relative; }
-    th.sort-active::after { content: ' ↕'; position: absolute; right: 5px; }
+    th { background: #f8fafc; color: #7f8c8d; text-transform: uppercase; font-size: 0.75em; cursor: pointer; position: relative; user-select: none; }
+    th:hover { background: #f1f5f9; color: var(--primary); }
+    th.sort-active::after { content: ' ↕'; position: absolute; right: 5px; color: var(--primary); }
 
     .type-emi { color: var(--secondary); font-weight: 600; background: #f4f0fa; }
     .btn-del-icon { background: none; color: var(--danger); border: none; padding: 0; width: auto; font-size: 1.2em; cursor: pointer; }
     .btn-edit { background: var(--info); padding: 5px 10px; border-radius: 4px; color: white; width: auto; font-size: 0.8em; }
     .btn-del { background: var(--danger); padding: 5px 10px; border-radius: 4px; color: white; width: auto; font-size: 0.8em; }
 
-    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } }
+    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } .title-banner h1 { font-size: 2.2em; } }
   </style>
 </head>
 <body>
@@ -96,7 +97,7 @@
 <div class="container">
   <div class="sidebar">
     <div class="sidebar-section">
-      <button class="tab-btn intro-tab" onclick="showIntroduction()">📖 Quick Guide <span>➔</span></button>
+      <button class="tab-btn intro-tab" onclick="showIntroduction()">📖 System Introduction <span>➔</span></button>
     </div>
     
     <div class="sidebar-section">
@@ -145,6 +146,7 @@
     <div id="authOverlay" class="section">
         <span style="font-size: 4em;">🔒</span>
         <h2 id="authMemberName">Select a Member</h2>
+        <p>Enter either the Member Password or the Master Password.</p>
         <input type="password" id="sessionPassInput" placeholder="Enter Password">
         <button onclick="unlockMember()" style="padding: 15px 40px; font-size: 1.1em; background: var(--secondary); color: white;">Unlock Ledger</button>
     </div>
@@ -195,7 +197,7 @@
           </div>
         </div>
 
-        <!-- Excel Style History -->
+        <!-- History -->
         <div class="section">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
             <h3>History</h3>
@@ -211,11 +213,11 @@
             <table>
               <thead>
                 <tr>
-                  <th onclick="setSort('date')" class="sort-active" id="th-date">Date</th>
-                  <th>Type</th>
+                  <th onclick="setSort('date')" id="th-date">Date</th>
+                  <th onclick="setSort('type')" id="th-type">Type</th>
                   <th onclick="setSort('amount')" id="th-amount">Amount</th>
-                  <th>Closing Balance</th>
-                  <th>Notes</th>
+                  <th onclick="setSort('balance')" id="th-balance">Closing Balance</th>
+                  <th onclick="setSort('comment')" id="th-comment">Notes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -248,6 +250,7 @@
   // Master password: akash8995
   const MASTER_HASH = "307d89693952796e9526715f5e55ee1893c78a0c20a9a838561d5f30832049c8";
 
+  // Highly robust SHA-256 for local/non-HTTPS use
   function sha256(ascii) {
     function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
     var mathPow = Math.pow, maxWord = mathPow(2, 32), result = '', words = [], asciiLength = ascii.length, hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], primeCounter = k.length;
@@ -270,234 +273,3 @@
     words[words.length] = (asciiLength * 8) | 0;
     for (j = 0; j < words.length; ) {
         var w = words.slice(j, j += 64), oldHash = hash.slice(0);
-        for (i = 0; i < 64; i++) {
-            var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4], temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0), temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
-            hash = [(temp1 + temp2) | 0].concat(hash); hash[4] = (hash[4] + temp1) | 0;
-        }
-        for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
-    }
-    for (i = 0; i < 8; i++) {
-        for (j = 3; j + 1; j--) {
-            var b = (hash[i] >> (j * 8)) & 255;
-            result += (b < 16 ? '0' : '') + b.toString(16);
-        }
-    }
-    return result;
-  }
-
-  function init() {
-    document.getElementById('tDate').valueAsDate = new Date();
-    db.ref('ledger').on('value', snap => {
-      allPeople = snap.val() || {};
-      renderPersonList();
-      if (currentPersonId) checkAuthAndRender();
-    });
-  }
-
-  function renderPersonList() {
-    const list = document.getElementById('personList');
-    list.innerHTML = '';
-    Object.keys(allPeople).forEach(id => {
-      const isUnlocked = unlockedSessions[id] || !allPeople[id].password;
-      const div = document.createElement('div');
-      div.className = `tab-btn person-item ${id === currentPersonId ? 'active' : ''}`;
-      div.innerHTML = `
-        <span onclick="selectPerson('${id}')" style="flex-grow:1; text-align:left;">${allPeople[id].name} ${isUnlocked ? '🔓' : '🔒'}</span>
-        <button class="btn-del-icon" onclick="deleteMemberProfile(event, '${id}')">🗑️</button>
-      `;
-      list.appendChild(div);
-    });
-  }
-
-  function showIntroduction() {
-      currentPersonId = null;
-      document.getElementById('introView').style.display = 'flex';
-      document.getElementById('authOverlay').style.display = 'none';
-      document.getElementById('protectedArea').style.display = 'none';
-      renderPersonList();
-  }
-
-  function selectPerson(id) {
-    currentPersonId = id;
-    document.getElementById('introView').style.display = 'none';
-    checkAuthAndRender();
-    renderPersonList();
-  }
-
-  function addNewPerson() {
-    const name = document.getElementById('newPersonName').value.trim();
-    const pass = document.getElementById('newPersonPass').value.trim();
-    if (!name) return alert("Name required.");
-    const master = prompt("Enter Master Password to authorize profile creation:");
-    if (!master || sha256(master.trim()) !== MASTER_HASH) return alert("Unauthorized.");
-    db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] });
-    document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = '';
-  }
-
-  function deleteMemberProfile(e, id) {
-      e.stopPropagation();
-      const master = prompt("Enter Master Password to delete profile:");
-      if (master && sha256(master.trim()) === MASTER_HASH) {
-          if (confirm("Delete " + allPeople[id].name + "?")) db.ref(`ledger/${id}`).remove();
-      } else alert("Denied.");
-  }
-
-  function checkAuthAndRender() {
-    const overlay = document.getElementById('authOverlay'), content = document.getElementById('protectedArea');
-    const person = allPeople[currentPersonId];
-    if (!person.password) unlockedSessions[currentPersonId] = true;
-    if (unlockedSessions[currentPersonId]) {
-      overlay.style.display = 'none'; content.style.display = 'flex';
-      document.getElementById('heroTitle').innerText = person.name + "'s Ledger";
-      updateUI();
-    } else {
-      overlay.style.display = 'flex'; content.style.display = 'none';
-      document.getElementById('authMemberName').innerText = person.name;
-    }
-  }
-
-  function unlockMember() {
-    const typed = document.getElementById('sessionPassInput').value.trim();
-    const hashed = sha256(typed);
-    if (hashed === allPeople[currentPersonId].password || hashed === MASTER_HASH) {
-      unlockedSessions[currentPersonId] = true;
-      checkAuthAndRender();
-      renderPersonList();
-    } else alert("Incorrect password.");
-  }
-
-  function setSort(col) {
-    if (sortCol === col) sortDir *= -1;
-    else { sortCol = col; sortDir = -1; }
-    document.querySelectorAll('th').forEach(t => t.classList.remove('sort-active'));
-    document.getElementById('th-' + col)?.classList.add('sort-active');
-    updateUI();
-  }
-
-  function updateUI() {
-    if (!currentPersonId) return;
-    const person = allPeople[currentPersonId];
-    document.getElementById('globalRate').value = person.globalRate || 0;
-    
-    let userT = (person.transactions || []).filter(t => t.type !== 'interest_emi');
-    userT.sort((a,b) => new Date(a.date) - new Date(b.date));
-    
-    let timeline = [], bal = 0, intAccum = 0, stats = {s:0, r:0, i:0};
-    const rate = person.globalRate || 0;
-
-    if (userT.length > 0) {
-      let curr = new Date(userT[0].date); curr.setHours(0,0,0,0);
-      let end = new Date(); end.setHours(23,59,59);
-      while (curr <= end) {
-        if (curr.getDate() === 1 && intAccum > 0) {
-          bal += intAccum; stats.i += intAccum;
-          timeline.push({ id: 'I'+curr.getTime(), date: curr.toISOString().split('T')[0], type:'interest_emi', amount: intAccum, balance: bal, comment: 'Accrued Interest'});
-          intAccum = 0;
-        }
-        userT.filter(t => t.date === curr.toISOString().split('T')[0]).forEach(t => {
-          if (t.type === 'lent') { bal += t.amount; stats.s += t.amount; }
-          else { bal -= t.amount; stats.r += t.amount; }
-          timeline.push({...t, balance: bal});
-        });
-        if (bal > 0 && rate > 0) intAccum += bal * (rate / 100 / 365);
-        curr.setDate(curr.getDate() + 1);
-      }
-    }
-
-    document.getElementById('statBalance').innerText = '₹' + Math.round(bal).toLocaleString();
-    document.getElementById('statReceived').innerText = '₹' + Math.round(stats.r).toLocaleString();
-    document.getElementById('statSent').innerText = '₹' + Math.round(stats.s).toLocaleString();
-    document.getElementById('statInterest').innerText = '₹' + Math.round(stats.i).toLocaleString();
-    
-    updatePie(stats.s, stats.i, stats.r);
-
-    // Filter Logic
-    const search = document.getElementById('filterSearch').value.toLowerCase();
-    const typeFilt = document.getElementById('filterType').value;
-    let filtered = timeline.filter(t => 
-      (t.comment || '').toLowerCase().includes(search) && 
-      (typeFilt === 'all' || t.type === typeFilt)
-    );
-
-    // Sort Logic
-    filtered.sort((a,b) => {
-        let vA = a[sortCol], vB = b[sortCol];
-        if (sortCol === 'date') { vA = new Date(vA); vB = new Date(vB); }
-        return vA < vB ? -1 * sortDir : (vA > vB ? 1 * sortDir : 0);
-    });
-
-    const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
-    filtered.forEach(t => {
-      const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
-      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button class="btn-edit" onclick="editEntry(\''+t.id+'\')">✏️</button> <button class="btn-del" onclick="deleteEntry(\''+t.id+'\')">🗑️</button>':'-'}</td>`;
-    });
-  }
-
-  function updatePie(s, i, r) {
-    const ctx = document.getElementById('loanPieChart').getContext('2d');
-    if (myPieChart) myPieChart.destroy();
-    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
-  }
-
-  function handleTransaction() {
-    const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, editId = document.getElementById('editIdx').value;
-    if (!amount || !date) return alert("Fill data!");
-    let person = allPeople[currentPersonId]; if (!person.transactions) person.transactions = [];
-    if (editId === "-1") person.transactions.push({ id: 'T'+Date.now(), type, amount, date, comment });
-    else { const idx = person.transactions.findIndex(t => t.id === editId); person.transactions[idx] = { ...person.transactions[idx], type, amount, date, comment }; }
-    db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
-    resetForm();
-  }
-
-  function editEntry(id) {
-    const entry = allPeople[currentPersonId].transactions.find(t => t.id === id);
-    document.getElementById('tType').value = entry.type; document.getElementById('tAmount').value = entry.amount; document.getElementById('tDate').value = entry.date; document.getElementById('tComment').value = entry.comment || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update Record";
-  }
-
-  function deleteEntry(id) {
-    if(confirm("Delete record?")) db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
-  }
-
-  function updateSettings() {
-    db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value));
-  }
-
-  function changeMemberPassword() {
-    const np = document.getElementById('changePassInput').value.trim();
-    if (!np) return alert("Type password.");
-    db.ref(`ledger/${currentPersonId}/password`).set(sha256(np));
-    alert("Updated!"); document.getElementById('changePassInput').value = "";
-  }
-
-  function deleteMemberPassword() {
-    if (confirm("Remove password lock?")) db.ref(`ledger/${currentPersonId}/password`).set("");
-  }
-
-  function exportToCSV() {
-    const p = allPeople[currentPersonId]; let csv = "Date,Type,Amount,Notes\n";
-    p.transactions.filter(t => t.type !== 'interest_emi').forEach(t => csv += `${t.date},${t.type},${t.amount},"${(t.comment||'').replace(/"/g, '""')}"\n`);
-    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `${p.name}_ledger.csv`; link.click();
-  }
-
-  function handleCSVImport(e) {
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      const lines = ev.target.result.split('\n'); const imported = [];
-      for (let i = 1; i < lines.length; i++) {
-        const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        if (cols.length < 3) continue;
-        imported.push({ id: 'T'+Date.now()+i, date: cols[0].trim(), type: cols[1].trim(), amount: parseFloat(cols[2]), comment: cols[3]?.replace(/^"|"$/g, '') || '' });
-      }
-      db.ref(`ledger/${currentPersonId}/transactions`).set(imported);
-    };
-    reader.readAsText(e.target.files[0]);
-  }
-
-  function resetForm() {
-    document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Record"; document.getElementById('tDate').valueAsDate = new Date();
-  }
-
-  init();
-</script>
-</body>
-</html>
