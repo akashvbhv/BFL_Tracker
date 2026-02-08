@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ledger Management System</title>
   
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playball&display=swap" rel="stylesheet">
-  
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
@@ -20,68 +18,31 @@
       --dark: #2c3e50;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    
     body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: var(--dark); }
-
-    /* Banner */
     .title-banner { background: rgba(255, 255, 255, 0.95); margin: 0 auto 25px auto; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 1300px; }
     .title-banner h1 { font-family: 'Dancing Script', cursive; font-size: 3.5em; font-weight: 700; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-
     .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-    
-    /* Sidebar Styling */
     .sidebar { display: flex; flex-direction: column; gap: 20px; }
-    
     .sidebar-section { background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     .sidebar h2 { font-size: 0.9em; margin-bottom: 12px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
-    
-    /* Uniform Tab Style */
-    .tab-btn { 
-      padding: 14px; border-radius: 10px; cursor: pointer; border: none; width: 100%; 
-      font-weight: 600; font-size: 0.95em; transition: 0.3s; display: flex; 
-      justify-content: space-between; align-items: center; margin-bottom: 8px;
-    }
-
+    .tab-btn { padding: 14px; border-radius: 10px; cursor: pointer; border: none; width: 100%; font-weight: 600; font-size: 0.95em; transition: 0.3s; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .intro-tab { background: var(--info); color: white; margin-bottom: 0; }
-    .intro-tab:hover { background: #2980b9; transform: translateY(-2px); }
-
     .person-item { background: white; color: var(--dark); border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .person-item:hover { border-color: var(--primary); transform: translateX(5px); }
-    .person-item.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); }
-
-    /* New Member Tab/Form */
-    .new-member-form { display: flex; flex-direction: column; gap: 10px; }
-    .new-member-form input { background: white; border: 2px solid #e8ecf4; }
-    .btn-create { background: var(--success); color: white; margin-top: 5px; }
-
-    /* Content Views */
+    .person-item.active { background: var(--primary); color: white; border-color: var(--primary); }
     .main-content { display: flex; flex-direction: column; gap: 20px; }
     .section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     .protected-content, #authOverlay, #introView { display: none; flex-direction: column; gap: 20px; }
-
     #introView { display: flex; }
     .guide-step { margin-bottom: 20px; padding-left: 15px; border-left: 4px solid var(--info); }
-    .guide-step h4 { color: var(--secondary); margin-bottom: 5px; }
-
-    /* Auth Overlay */
     #authOverlay { background: white; border-radius: 15px; padding: 50px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); align-items: center; }
-    #authOverlay input { max-width: 300px; text-align: center; font-size: 1.2em; margin: 20px 0; }
-
-    /* Dashboard */
+    #authOverlay input { max-width: 300px; text-align: center; font-size: 1.2em; margin: 20px 0; border: 2px solid #ddd; }
     .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .card { background: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid #eee; }
     .card .val { font-size: 1.5em; font-weight: 700; margin: 5px 0; }
-    
-    input, select, button, textarea { width: 100%; padding: 12px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; transition: 0.2s; }
-    input:focus { border-color: var(--primary); }
-    button { cursor: pointer; font-weight: 600; border: none; }
-
-    table { width: 100%; border-collapse: collapse; }
+    input, select, button, textarea { width: 100%; padding: 12px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
     .type-emi { color: var(--secondary); font-weight: 600; background: #f4f0fa; }
-    .btn-edit { background: var(--info); padding: 5px 10px; border-radius: 4px; color: white; width: auto; }
-    .btn-del { background: var(--danger); padding: 5px 10px; border-radius: 4px; color: white; width: auto; }
-
+    .btn-del-icon { background: none; color: var(--danger); border: none; padding: 0; width: auto; font-size: 1.2em; cursor: pointer; }
     @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } }
   </style>
 </head>
@@ -93,63 +54,47 @@
 
 <div class="container">
   <div class="sidebar">
-    <!-- Intro Tab -->
     <div class="sidebar-section">
       <button class="tab-btn intro-tab" onclick="showIntroduction()">📖 Quick Guide <span>➔</span></button>
     </div>
     
-    <!-- Members Tab -->
     <div class="sidebar-section">
       <h2>Active Members</h2>
       <div id="personList"></div>
     </div>
     
-    <!-- Add Member Tab -->
     <div class="sidebar-section">
       <h2>New Member Profile</h2>
-      <div class="new-member-form">
+      <div style="display: flex; flex-direction: column; gap: 10px;">
         <input type="text" id="newPersonName" placeholder="Full Name">
-        <input type="password" id="newPersonPass" placeholder="Personal Password">
-        <button class="tab-btn btn-create" onclick="addNewPerson()">Create Profile +</button>
+        <input type="password" id="newPersonPass" placeholder="Member Password">
+        <button class="tab-btn" style="background:var(--success); color:white;" onclick="addNewPerson()">Create Profile +</button>
       </div>
     </div>
   </div>
 
   <div class="main-content">
     
-    <!-- INTRODUCTION VIEW -->
     <div id="introView" class="section">
         <h3>Mastering the Ledger System</h3>
-        <p style="margin-bottom: 20px; color: #666;">This application follows the <b>Bajaj Finserv Overdraft</b> financial logic: Daily interest accrual with monthly capitalization.</p>
-        
+        <p style="margin-bottom: 20px; color: #666;">This application follows the <b>Bajaj Finserv Overdraft</b> financial logic.</p>
         <div class="guide-step">
-            <h4>1. Member Creation</h4>
-            <p>Add members in the sidebar. Note: Adding or Deleting members requires the <b>Master Password</b> to prevent data loss.</p>
+            <h4>1. Member Management</h4>
+            <p>Adding or Deleting members requires the <b>Master Password (Akash#8995)</b>.</p>
         </div>
         <div class="guide-step">
-            <h4>2. Daily Interest Calculation</h4>
-            <p>Interest is calculated every 24 hours based on the closing principal balance using the Global Rate set in the ledger.</p>
-        </div>
-        <div class="guide-step">
-            <h4>3. EMI on Interest (Compounding)</h4>
-            <p>On the 1st of every month, the accumulated daily interest is converted into an <b>EMI on Interest</b> entry and added to the principal balance.</p>
-        </div>
-        <div class="guide-step">
-            <h4>4. Corrections & Recalculation</h4>
-            <p>If you edit an entry from the past, the system will instantly re-process the entire timeline to ensure the current balance is 100% accurate.</p>
+            <h4>2. Overdraft Logic</h4>
+            <p>Interest accrues daily and capitalizes (becomes EMI on Interest) on the 1st of every month.</p>
         </div>
     </div>
 
-    <!-- AUTH OVERLAY -->
     <div id="authOverlay" class="section">
         <span style="font-size: 4em;">🔒</span>
         <h2 id="authMemberName">Select a Member</h2>
-        <p>This ledger is password protected.</p>
-        <input type="password" id="sessionPassInput" placeholder="••••">
+        <input type="password" id="sessionPassInput" placeholder="Enter Password">
         <button onclick="unlockMember()" style="padding: 15px 40px; font-size: 1.1em; background: var(--secondary);">Unlock Ledger</button>
     </div>
 
-    <!-- LEDGER CONTENT -->
     <div id="protectedArea" class="protected-content">
         <div class="section" style="text-align: center;">
             <h2 id="heroTitle">Breakdown</h2>
@@ -164,7 +109,7 @@
         </div>
 
         <div class="section" style="background: #f4f7ff; border: 1px solid #d0d7de;">
-            <h3>Security Settings</h3>
+            <h3>Member Security</h3>
             <div class="form-grid">
                 <div><label>New Password</label><input type="password" id="changePassInput"></div>
                 <button onclick="changeMemberPassword()" style="background: var(--info);">Update Password</button>
@@ -192,7 +137,7 @@
             <div><label>Date</label><input type="date" id="tDate"></div>
             <div style="grid-column: span 2;"><label>Notes</label><textarea id="tComment" placeholder="Details..." rows="1" style="height:44px"></textarea></div>
             <input type="hidden" id="editIdx" value="-1">
-            <button onclick="handleTransaction()" id="submitBtn">Save Entry</button>
+            <button onclick="handleTransaction()" id="submitBtn">Save Record</button>
           </div>
         </div>
 
@@ -222,18 +167,47 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 
-  let currentPersonId = null;
-  let allPeople = {};
-  let myPieChart = null;
-  let unlockedSessions = {}; 
+  let currentPersonId = null, allPeople = {}, myPieChart = null, unlockedSessions = {}; 
+  
+  // Akash#8995 Hash
+  const MASTER_HASH = "103322472b83445693630f5b9997637841f32a7620a2e724734661853406f0e9";
 
-  const MASTER_HASH = "103322472b83445693630f5b9997637841f32a7620a2e724734661853406f0e9"; // Akash#8995
-
-  async function hashString(str) {
-    if (!str) return "";
-    const utf8 = new TextEncoder().encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
-    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  // SHA-256 implementation that works without HTTPS
+  function sha256(ascii) {
+    function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
+    var mathPow = Math.pow, maxWord = mathPow(2, 32), result = '', words = [], asciiLength = ascii.length, hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], primeCounter = k.length;
+    var isComposite = {};
+    for (var i = 2; primeCounter < 64; i++) {
+        if (!isComposite[i]) {
+            for (var j = i << 1; j < 313; j += i) isComposite[j] = i;
+            hash[primeCounter] = (mathPow(i, .5) * maxWord) | 0;
+            k[primeCounter++] = (mathPow(i, 1 / 3) * maxWord) | 0;
+        }
+    }
+    ascii += '\x80';
+    while (ascii.length % 64 - 56) ascii += '\x00';
+    for (i = 0; i < ascii.length; i++) {
+        var j = ascii.charCodeAt(i);
+        if (j >> 8) return;
+        words[i >> 2] |= j << ((3 - i) % 4) * 8;
+    }
+    words[words.length] = ((asciiLength / 8) / maxWord) | 0;
+    words[words.length] = (asciiLength * 8) | 0;
+    for (j = 0; j < words.length; ) {
+        var w = words.slice(j, j += 64), oldHash = hash.slice(0);
+        for (i = 0; i < 64; i++) {
+            var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4], temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0), temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            hash = [(temp1 + temp2) | 0].concat(hash); hash[4] = (hash[4] + temp1) | 0;
+        }
+        for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+    for (i = 0; i < 8; i++) {
+        for (j = 3; j + 1; j--) {
+            var b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? '0' : '') + b.toString(16);
+        }
+    }
+    return result;
   }
 
   function init() {
@@ -255,7 +229,7 @@
       div.className = `tab-btn person-item ${id === currentPersonId ? 'active' : ''}`;
       div.innerHTML = `
         <span onclick="selectPerson('${id}')" style="flex-grow:1; text-align:left;">${allPeople[id].name} ${isUnlocked ? '🔓' : '🔒'}</span>
-        <span onclick="deleteMemberProfile(event, '${id}')" style="color:var(--danger); margin-left:10px;">🗑️</span>
+        <button class="btn-del-icon" onclick="deleteMemberProfile(event, '${id}')">🗑️</button>
       `;
       list.appendChild(div);
     });
@@ -272,40 +246,32 @@
   function selectPerson(id) {
     currentPersonId = id;
     document.getElementById('introView').style.display = 'none';
-    renderPersonList();
     checkAuthAndRender();
+    renderPersonList();
   }
 
-  async function addNewPerson() {
+  function addNewPerson() {
     const name = document.getElementById('newPersonName').value.trim();
     const pass = document.getElementById('newPersonPass').value.trim();
-    if (!name) return alert("Name is required.");
-
-    const masterPrompt = prompt("Enter MASTER PASSWORD to create profile:");
-    if (await hashString(masterPrompt) !== MASTER_HASH) return alert("Master password incorrect.");
-
-    const hp = pass ? await hashString(pass) : "";
-    db.ref('ledger').push({ name, password: hp, globalRate: 0, transactions: [] });
-    document.getElementById('newPersonName').value = '';
-    document.getElementById('newPersonPass').value = '';
+    if (!name) return alert("Name required.");
+    const master = prompt("Enter Master Password (Akash#8995):");
+    if (!master || sha256(master.trim()) !== MASTER_HASH) return alert("Master password incorrect.");
+    db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] });
+    document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = '';
   }
 
-  async function deleteMemberProfile(e, id) {
+  function deleteMemberProfile(e, id) {
       e.stopPropagation();
-      const masterPrompt = prompt("Enter MASTER PASSWORD to delete profile:");
-      if (await hashString(masterPrompt) === MASTER_HASH) {
-          if (confirm("Permanently delete data for " + allPeople[id].name + "?")) db.ref(`ledger/${id}`).remove();
-      } else alert("Master password incorrect.");
+      const master = prompt("Enter Master Password to delete:");
+      if (master && sha256(master.trim()) === MASTER_HASH) {
+          if (confirm("Delete " + allPeople[id].name + "?")) db.ref(`ledger/${id}`).remove();
+      } else alert("Access denied.");
   }
 
-  async function checkAuthAndRender() {
-    const overlay = document.getElementById('authOverlay');
-    const content = document.getElementById('protectedArea');
-    if (!currentPersonId) return;
-
+  function checkAuthAndRender() {
+    const overlay = document.getElementById('authOverlay'), content = document.getElementById('protectedArea');
     const person = allPeople[currentPersonId];
     if (!person.password) unlockedSessions[currentPersonId] = true;
-
     if (unlockedSessions[currentPersonId]) {
       overlay.style.display = 'none'; content.style.display = 'flex';
       document.getElementById('heroTitle').innerText = person.name + "'s Ledger";
@@ -316,16 +282,16 @@
     }
   }
 
-  async function unlockMember() {
-    const typed = document.getElementById('sessionPassInput').value;
-    const hashed = await hashString(typed);
+  function unlockMember() {
+    const typed = document.getElementById('sessionPassInput').value.trim();
+    const hashed = sha256(typed);
     if (hashed === allPeople[currentPersonId].password || hashed === MASTER_HASH) {
       unlockedSessions[currentPersonId] = true;
       checkAuthAndRender();
+      renderPersonList();
     } else alert("Incorrect password.");
   }
 
-  // --- CALC ENGINE ---
   function updateUI() {
     const person = allPeople[currentPersonId];
     document.getElementById('globalRate').value = person.globalRate || 0;
@@ -333,7 +299,6 @@
     userT.sort((a,b) => new Date(a.date) - new Date(b.date));
     let timeline = [], bal = 0, intAccum = 0, stats = {s:0, r:0, i:0};
     const rate = person.globalRate || 0;
-
     if (userT.length > 0) {
       let curr = new Date(userT[0].date); curr.setHours(0,0,0,0);
       let end = new Date(); end.setHours(23,59,59);
@@ -360,7 +325,7 @@
     const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
     timeline.reverse().forEach(t => {
       const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
-      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':'➖ Recv'}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td style="max-width:150px; overflow:hidden; text-overflow:ellipsis;">${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button class="btn-edit" onclick="editEntry(\''+t.id+'\')">✏️</button> <button class="btn-del" onclick="deleteEntry(\''+t.id+'\')">🗑️</button>':'-'}</td>`;
+      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':'➖ Recv'}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button class="btn-edit" onclick="editEntry(\''+t.id+'\')">✏️</button> <button class="btn-del" onclick="deleteEntry(\''+t.id+'\')">🗑️</button>':'-'}</td>`;
     });
   }
 
@@ -371,14 +336,9 @@
   }
 
   function handleTransaction() {
-    const amount = parseFloat(document.getElementById('tAmount').value);
-    const date = document.getElementById('tDate').value;
-    const comment = document.getElementById('tComment').value;
-    const type = document.getElementById('tType').value;
-    const editId = document.getElementById('editIdx').value;
+    const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, editId = document.getElementById('editIdx').value;
     if (!amount || !date) return alert("Fill data!");
-    let person = allPeople[currentPersonId];
-    if (!person.transactions) person.transactions = [];
+    let person = allPeople[currentPersonId]; if (!person.transactions) person.transactions = [];
     if (editId === "-1") person.transactions.push({ id: 'T'+Date.now(), type, amount, date, comment });
     else { const idx = person.transactions.findIndex(t => t.id === editId); person.transactions[idx] = { ...person.transactions[idx], type, amount, date, comment }; }
     db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
@@ -387,51 +347,38 @@
 
   function editEntry(id) {
     const entry = allPeople[currentPersonId].transactions.find(t => t.id === id);
-    document.getElementById('tType').value = entry.type;
-    document.getElementById('tAmount').value = entry.amount;
-    document.getElementById('tDate').value = entry.date;
-    document.getElementById('tComment').value = entry.comment || '';
-    document.getElementById('editIdx').value = id;
-    document.getElementById('submitBtn').innerText = "Update Record";
-    document.getElementById('formTitle').innerText = "Edit Record";
+    document.getElementById('tType').value = entry.type; document.getElementById('tAmount').value = entry.amount; document.getElementById('tDate').value = entry.date; document.getElementById('tComment').value = entry.comment || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update"; document.getElementById('formTitle').innerText = "Edit Entry";
   }
 
   function deleteEntry(id) {
-    if(!confirm("Delete entry?")) return;
-    db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
+    if(confirm("Delete?")) db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
   }
 
   function updateSettings() {
     db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value));
   }
 
-  async function changeMemberPassword() {
+  function changeMemberPassword() {
     const np = document.getElementById('changePassInput').value.trim();
-    if (!np) return alert("Type a password.");
-    db.ref(`ledger/${currentPersonId}/password`).set(await hashString(np));
-    alert("Password updated!");
-    document.getElementById('changePassInput').value = "";
+    if (!np) return alert("Type password.");
+    db.ref(`ledger/${currentPersonId}/password`).set(sha256(np));
+    alert("Updated!"); document.getElementById('changePassInput').value = "";
   }
 
   function deleteMemberPassword() {
-    if (confirm("Remove password requirement?")) db.ref(`ledger/${currentPersonId}/password`).set("");
+    if (confirm("Remove lock?")) db.ref(`ledger/${currentPersonId}/password`).set("");
   }
 
   function exportToCSV() {
-    const p = allPeople[currentPersonId];
-    let csv = "Date,Type,Amount,Notes\n";
+    const p = allPeople[currentPersonId]; let csv = "Date,Type,Amount,Notes\n";
     p.transactions.filter(t => t.type !== 'interest_emi').forEach(t => csv += `${t.date},${t.type},${t.amount},"${(t.comment||'').replace(/"/g, '""')}"\n`);
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    link.download = `${p.name}_ledger.csv`;
-    link.click();
+    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `${p.name}_ledger.csv`; link.click();
   }
 
   function handleCSVImport(e) {
     const reader = new FileReader();
     reader.onload = function(ev) {
-      const lines = ev.target.result.split('\n');
-      const imported = [];
+      const lines = ev.target.result.split('\n'); const imported = [];
       for (let i = 1; i < lines.length; i++) {
         const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
         if (cols.length < 3) continue;
@@ -443,12 +390,7 @@
   }
 
   function resetForm() {
-    document.getElementById('tAmount').value = '';
-    document.getElementById('tComment').value = '';
-    document.getElementById('editIdx').value = '-1';
-    document.getElementById('submitBtn').innerText = "Save Record";
-    document.getElementById('formTitle').innerText = "Add Transaction";
-    document.getElementById('tDate').valueAsDate = new Date();
+    document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Record"; document.getElementById('formTitle').innerText = "Add Transaction"; document.getElementById('tDate').valueAsDate = new Date();
   }
 
   init();
