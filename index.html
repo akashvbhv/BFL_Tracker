@@ -3,80 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Family Ledger - Multi-User OD</title>
+  <title>Vaibhav's Ledger</title>
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
 
   <style>
-    :root { --primary: #667eea; --secondary: #764ba2; --success: #00d4aa; --danger: #ff6b9d; }
+    :root { 
+      --primary: #667eea; --secondary: #764ba2; 
+      --success: #00d4aa; --danger: #ff6b9d; 
+      --warning: #f1c40f; --info: #3498db;
+      --dark: #2c3e50;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #2c3e50; }
-    .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: var(--dark); }
+    
+    .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 260px 1fr; gap: 20px; }
     
     /* Sidebar */
     .sidebar { background: rgba(255,255,255,0.95); border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; }
-    .sidebar h2 { font-size: 1.2em; margin-bottom: 15px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; }
-    .person-item { padding: 10px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 5px; border: 1px solid transparent; }
-    .person-item:hover { background: #f0f4f8; }
+    .sidebar h2 { font-size: 1.1em; margin-bottom: 15px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; text-transform: uppercase; }
+    .person-item { padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.2s; margin-bottom: 8px; border: 1px solid transparent; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .person-item:hover { background: #f8fafc; border-color: var(--primary); }
     .person-item.active { background: var(--primary); color: white; font-weight: bold; }
     
     /* Main Content */
     .main-content { display: flex; flex-direction: column; gap: 20px; }
-    .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-    .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-    .card .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; color: var(--secondary); }
-    .card .label { font-size: 0.8em; color: #7f8c8d; text-transform: uppercase; }
 
-    .section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end; }
-    
-    input, select, button { width: 100%; padding: 12px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; }
-    button { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.3s; }
-    button:hover { opacity: 0.9; transform: translateY(-2px); }
-    .btn-edit { background: #f39c12; padding: 5px 10px; font-size: 0.8em; }
-    .btn-del { background: var(--danger); padding: 5px 10px; font-size: 0.8em; }
+    /* Pie Chart Hero */
+    .hero-section { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .hero-section h2 { font-size: 1.2em; margin-bottom: 10px; color: var(--secondary); }
+    .chart-container { height: 220px; width: 100%; max-width: 400px; }
 
-    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.9em; }
-    th { background: #f8fafc; color: #666; }
-    .type-interest { color: #9b59b6; font-style: italic; }
+    /* Dashboard Cards */
+    .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+    .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-bottom: 4px solid #eee; }
+    .card .val { font-size: 1.5em; font-weight: 700; margin: 5px 0; }
+    .card .label { font-size: 0.75em; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; }
+    .card.c1 { border-color: var(--danger); } 
+    .card.c2 { border-color: var(--info); }   
+    .card.c3 { border-color: var(--success); } 
+    .card.c4 { border-color: var(--warning); } 
+
+    .section { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .section h3 { font-size: 1.1em; color: var(--secondary); border-left: 4px solid var(--primary); padding-left: 10px; }
     
-    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; align-items: end; }
+    
+    label { display: block; margin-bottom: 5px; font-size: 0.85em; font-weight: 600; color: #666; }
+    input, select, button { width: 100%; padding: 10px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; font-size: 0.9em; }
+    
+    button { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    button:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 5px 10px rgba(0,0,0,0.1); }
+
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
+    th { background: #f8fafc; color: #7f8c8d; text-transform: uppercase; font-size: 0.75em; }
+    .type-emi { color: var(--secondary); font-weight: 600; background: #f4f0fa; }
+    
+    .btn-group { display: flex; gap: 5px; }
+    .btn-edit { background: var(--info); padding: 5px; font-size: 0.8em; }
+    .btn-del { background: var(--danger); padding: 5px; font-size: 0.8em; }
+    .btn-csv { background: #555; width: auto; padding: 8px 15px; }
+    .btn-import { background: #27ae60; width: auto; padding: 8px 15px; }
+
+    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } .section-header { flex-direction: column; align-items: flex-start; gap: 10px; } .section-header button { width: 100%; } }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Person Management -->
+  <!-- Sidebar -->
   <div class="sidebar">
-    <h2>People</h2>
+    <h2>Members</h2>
     <div id="personList"></div>
     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-    <input type="text" id="newPersonName" placeholder="Add New Name" style="margin-bottom: 10px;">
-    <button onclick="addNewPerson()" class="btn-success">Add Person</button>
+    <input type="text" id="newPersonName" placeholder="New Member Name" style="margin-bottom: 8px;">
+    <button onclick="addNewPerson()" style="background: var(--success);">Add Member</button>
   </div>
 
+  <!-- Main Content -->
   <div class="main-content">
-    <div class="card-row">
-      <div class="card">
-        <div class="label">Outstanding Balance</div>
-        <div class="val" id="statBalance">₹0</div>
-      </div>
-      <div class="card">
-        <div class="label">Rate (Annual)</div>
-        <div class="val" id="statRate">0%</div>
-      </div>
-      <div class="card">
-        <div class="label">Total Interest Paid</div>
-        <div class="val" id="statInterest">₹0</div>
+    
+    <!-- Top Hero Section -->
+    <div class="hero-section">
+      <h2 id="heroTitle">Loan Breakdown</h2>
+      <div class="chart-container">
+        <canvas id="loanPieChart"></canvas>
       </div>
     </div>
 
-    <!-- Entry Form -->
+    <!-- Dashboard -->
+    <div class="card-row">
+      <div class="card c1"><div class="label">Outstanding</div><div class="val" id="statBalance" style="color: var(--danger);">₹0</div></div>
+      <div class="card c2"><div class="label">Amount Received</div><div class="val" id="statReceived" style="color: var(--info);">₹0</div></div>
+      <div class="card c3"><div class="label">Amount  Sent</div><div class="val" id="statSent" style="color: var(--success);">₹0</div></div>
+      <div class="card c4"><div class="label">Interest Accured</div><div class="val" id="statInterest" style="color: var(--warning);">₹0</div></div>
+    </div>
+
+    <!-- Rate Settings -->
     <div class="section">
-      <h3 id="formTitle">Add Transaction</h3>
+      <h3>Loan Settings</h3>
+      <div class="form-grid">
+        <div style="flex: 2;">
+          <label>Global Annual Interest Rate (%)</label>
+          <input type="number" id="globalRate" step="0.01" placeholder="12.00">
+        </div>
+        <button onclick="updateSettings()" style="background: var(--secondary);">Update Rate</button>
+      </div>
+    </div>
+
+    <!-- Entry Form & Import -->
+    <div class="section">
+      <div class="section-header">
+        <h3 id="formTitle">Add Transaction</h3>
+        <button onclick="document.getElementById('csvFileInput').click()" class="btn-import">Import CSV</button>
+        <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVImport(event)">
+      </div>
       <div class="form-grid">
         <div>
           <label>Type</label>
@@ -93,18 +138,17 @@
           <label>Date</label>
           <input type="date" id="tDate">
         </div>
-        <div>
-          <label>Interest Rate % (Annual)</label>
-          <input type="number" id="tRate" step="0.1" placeholder="8.5">
-        </div>
         <input type="hidden" id="editIdx" value="-1">
         <button onclick="handleTransaction()" id="submitBtn">Save Entry</button>
       </div>
     </div>
 
-    <!-- History -->
+    <!-- History & Export -->
     <div class="section">
-      <h3>Transaction History</h3>
+      <div class="section-header">
+        <h3>Transaction History</h3>
+        <button onclick="exportToCSV()" class="btn-csv">Export History (CSV)</button>
+      </div>
       <div style="overflow-x: auto;">
         <table>
           <thead>
@@ -112,7 +156,7 @@
               <th>Date</th>
               <th>Type</th>
               <th>Amount</th>
-              <th>Balance</th>
+              <th>Closing Balance</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -140,8 +184,8 @@
 
   let currentPersonId = null;
   let allPeople = {};
+  let myPieChart = null;
 
-  // Initialize
   function init() {
     document.getElementById('tDate').valueAsDate = new Date();
     db.ref('ledger').on('value', snap => {
@@ -169,6 +213,8 @@
 
   function selectPerson(id) {
     currentPersonId = id;
+    document.getElementById('heroTitle').innerText = allPeople[id].name + "'s Breakdown";
+    resetForm();
     renderPersonList();
     updateUI();
   }
@@ -176,96 +222,143 @@
   function addNewPerson() {
     const name = document.getElementById('newPersonName').value.trim();
     if (!name) return;
-    const newRef = db.ref('ledger').push();
-    newRef.set({ name: name, transactions: [] });
+    db.ref('ledger').push({ name: name, globalRate: 0, transactions: [] });
     document.getElementById('newPersonName').value = '';
   }
 
-  // --- CORE LOGIC: BAJAJ OD RECALCULATION ---
+  function updateSettings() {
+    const rate = parseFloat(document.getElementById('globalRate').value);
+    if (isNaN(rate)) return alert("Invalid Rate");
+    db.ref(`ledger/${currentPersonId}/globalRate`).set(rate);
+  }
+
+  // --- CSV LOGIC ---
+  function exportToCSV() {
+    const person = allPeople[currentPersonId];
+    if (!person || !person.transactions) return alert("No transactions to export");
+    const userTrans = person.transactions.filter(t => t.type !== 'interest_emi');
+    let csvContent = "data:text/csv;charset=utf-8,Date,Type,Amount\n";
+    userTrans.forEach(t => { csvContent += `${t.date},${t.type},${t.amount}\n`; });
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${person.name}_ledger.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  function handleCSVImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const text = e.target.result;
+      const lines = text.split('\n');
+      const importedTrans = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',');
+        if (cols.length < 3) continue;
+        const date = cols[0].trim();
+        const type = cols[1].trim();
+        const amount = parseFloat(cols[2]);
+        if (date && (type === 'lent' || type === 'received') && !isNaN(amount)) {
+          importedTrans.push({ id: 'T' + Date.now() + i, date, type, amount });
+        }
+      }
+      if (importedTrans.length > 0) {
+        if (confirm(`Import ${importedTrans.length} transactions? This will overwrite existing records.`)) {
+          db.ref(`ledger/${currentPersonId}/transactions`).set(importedTrans);
+        }
+      } else { alert("No valid transactions found."); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+  }
+
+  // --- CALCULATION ENGINE ---
   function updateUI() {
     if (!currentPersonId || !allPeople[currentPersonId]) return;
-    
     const person = allPeople[currentPersonId];
-    // Filter out previous system-generated interest rows to start fresh
-    let userTransactions = (person.transactions || []).filter(t => t.type !== 'interest');
+    document.getElementById('globalRate').value = person.globalRate || 0;
     
-    // Sort by date
+    let userTransactions = (person.transactions || []).filter(t => t.type !== 'interest_emi');
     userTransactions.sort((a,b) => new Date(a.date) - new Date(b.date));
 
-    // Recalculate everything from scratch (Timeline approach)
     let processedTimeline = [];
     let runningBalance = 0;
     let accumulatedInterest = 0;
-    let totalInterestPaid = 0;
-    let currentRate = 0;
+    let stats = { sent: 0, received: 0, interestPaid: 0 };
+    const rate = person.globalRate || 0;
 
     if (userTransactions.length > 0) {
       let firstDate = new Date(userTransactions[0].date);
       let today = new Date();
       today.setHours(23, 59, 59);
-
       let currDate = new Date(firstDate);
       currDate.setHours(0,0,0,0);
 
       while (currDate <= today) {
-        // 1. Check if it's the 1st of the month -> Capitalize Interest
         if (currDate.getDate() === 1 && accumulatedInterest > 0) {
           runningBalance += accumulatedInterest;
-          totalInterestPaid += accumulatedInterest;
-          processedTimeline.push({
-            date: currDate.toISOString().split('T')[0],
-            type: 'interest',
-            amount: accumulatedInterest,
-            balance: runningBalance
-          });
+          stats.interestPaid += accumulatedInterest;
+          processedTimeline.push({ date: currDate.toISOString().split('T')[0], type: 'interest_emi', amount: accumulatedInterest, balance: runningBalance });
           accumulatedInterest = 0;
         }
-
-        // 2. Process any user transactions on this day
         let dayTransactions = userTransactions.filter(t => t.date === currDate.toISOString().split('T')[0]);
         dayTransactions.forEach(t => {
-          currentRate = t.rate || currentRate;
-          if (t.type === 'lent') runningBalance += t.amount;
-          else runningBalance -= t.amount;
-          
+          if (t.type === 'lent') { runningBalance += t.amount; stats.sent += t.amount; }
+          else { runningBalance -= t.amount; stats.received += t.amount; }
           processedTimeline.push({...t, balance: runningBalance});
         });
-
-        // 3. Accrue daily interest for today's closing balance (OD style)
-        if (runningBalance > 0 && currentRate > 0) {
-          accumulatedInterest += runningBalance * (currentRate / 100 / 365);
-        }
-
+        if (runningBalance > 0 && rate > 0) accumulatedInterest += runningBalance * (rate / 100 / 365);
         currDate.setDate(currDate.getDate() + 1);
       }
     }
 
-    // Display Stats
     document.getElementById('statBalance').innerText = '₹' + Math.round(runningBalance).toLocaleString();
-    document.getElementById('statRate').innerText = (currentRate || 0) + '%';
-    document.getElementById('statInterest').innerText = '₹' + Math.round(totalInterestPaid).toLocaleString();
+    document.getElementById('statReceived').innerText = '₹' + Math.round(stats.received).toLocaleString();
+    document.getElementById('statSent').innerText = '₹' + Math.round(stats.sent).toLocaleString();
+    document.getElementById('statInterest').innerText = '₹' + Math.round(stats.interestPaid).toLocaleString();
     
-    // Default rate for form
-    document.getElementById('tRate').value = currentRate;
+    updatePieChart(stats.sent, stats.interestPaid, stats.received);
 
-    // Render Table
     const tbody = document.getElementById('historyBody');
     tbody.innerHTML = '';
-    processedTimeline.reverse().forEach((t, idx) => {
+    processedTimeline.reverse().forEach((t) => {
       const row = tbody.insertRow();
-      row.className = t.type === 'interest' ? 'type-interest' : '';
+      if(t.type === 'interest_emi') row.className = 'type-emi';
       row.innerHTML = `
         <td>${t.date}</td>
-        <td>${t.type === 'lent' ? '➕ Sent' : t.type === 'received' ? '➖ Recv' : '💰 Interest Billed'}</td>
+        <td>${t.type === 'lent' ? '➕ Principal Sent' : t.type === 'received' ? '➖ Repayment' : '💰 EMI on Interest'}</td>
         <td>₹${Math.round(t.amount).toLocaleString()}</td>
         <td>₹${Math.round(t.balance).toLocaleString()}</td>
-        <td>
-          ${t.type !== 'interest' ? `
-            <button class="btn-edit" onclick="editEntry(${userTransactions.indexOf(userTransactions.find(orig => orig.id === t.id))})">Edit</button>
-            <button class="btn-del" onclick="deleteEntry(${userTransactions.indexOf(userTransactions.find(orig => orig.id === t.id))})">Del</button>
-          ` : '-'}
-        </td>
-      `;
+        <td>${t.type !== 'interest_emi' ? `
+          <div class="btn-group">
+            <button class="btn-edit" onclick="editEntry('${t.id}')">Edit</button>
+            <button class="btn-del" onclick="deleteEntry('${t.id}')">Del</button>
+          </div>` : '-'}</td>`;
+    });
+  }
+
+  function updatePieChart(sent, interest, received) {
+    const ctx = document.getElementById('loanPieChart').getContext('2d');
+    if (myPieChart) myPieChart.destroy();
+    myPieChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Principal Sent', 'Interest EMI', 'Repayments'],
+        datasets: [{
+          data: [sent, interest, received],
+          backgroundColor: ['#00d4aa', '#f1c40f', '#3498db'],
+          borderWidth: 2, borderColor: '#ffffff'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } },
+        cutout: '65%'
+      }
     });
   }
 
@@ -273,55 +366,34 @@
     const type = document.getElementById('tType').value;
     const amount = parseFloat(document.getElementById('tAmount').value);
     const date = document.getElementById('tDate').value;
-    const rate = parseFloat(document.getElementById('tRate').value);
-    const editIdx = parseInt(document.getElementById('editIdx').value);
-
-    if (!amount || !date || isNaN(rate)) return alert("Fill all fields");
-
+    const editId = document.getElementById('editIdx').value;
+    if (!amount || !date) return alert("Fill all fields");
     let person = allPeople[currentPersonId];
     if (!person.transactions) person.transactions = [];
-    
-    let userT = person.transactions.filter(t => t.type !== 'interest');
-
-    const newEntry = {
-      id: editIdx === -1 ? Date.now() : userT[editIdx].id,
-      type, amount, date, rate
-    };
-
-    if (editIdx === -1) {
-      person.transactions.push(newEntry);
+    if (editId === "-1") {
+      person.transactions.push({ id: 'T' + Date.now(), type, amount, date });
     } else {
-      // Find the actual index in the original array
-      const realIdx = person.transactions.findIndex(t => t.id === newEntry.id);
-      person.transactions[realIdx] = newEntry;
+      const idx = person.transactions.findIndex(t => t.id === editId);
+      person.transactions[idx] = { ...person.transactions[idx], type, amount, date };
     }
-
     db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
     resetForm();
   }
 
-  function editEntry(idx) {
-    const person = allPeople[currentPersonId];
-    const userT = person.transactions.filter(t => t.type !== 'interest');
-    const entry = userT[idx];
-
+  function editEntry(id) {
+    const entry = allPeople[currentPersonId].transactions.find(t => t.id === id);
     document.getElementById('tType').value = entry.type;
     document.getElementById('tAmount').value = entry.amount;
     document.getElementById('tDate').value = entry.date;
-    document.getElementById('tRate').value = entry.rate;
-    document.getElementById('editIdx').value = idx;
+    document.getElementById('editIdx').value = id;
     document.getElementById('submitBtn').innerText = "Update Entry";
-    document.getElementById('formTitle').innerText = "Editing Transaction";
+    document.getElementById('formTitle').innerText = "Edit Transaction";
   }
 
-  function deleteEntry(idx) {
-    if (!confirm("Delete this transaction?")) return;
-    const person = allPeople[currentPersonId];
-    const userT = person.transactions.filter(t => t.type !== 'interest');
-    const entryToDelete = userT[idx];
-    
-    const newTransactions = person.transactions.filter(t => t.id !== entryToDelete.id);
-    db.ref(`ledger/${currentPersonId}/transactions`).set(newTransactions);
+  function deleteEntry(id) {
+    if (!confirm("Delete entry?")) return;
+    const newTrans = allPeople[currentPersonId].transactions.filter(t => t.id !== id);
+    db.ref(`ledger/${currentPersonId}/transactions`).set(newTrans);
   }
 
   function resetForm() {
@@ -329,6 +401,7 @@
     document.getElementById('editIdx').value = '-1';
     document.getElementById('submitBtn').innerText = "Save Entry";
     document.getElementById('formTitle').innerText = "Add Transaction";
+    document.getElementById('tDate').valueAsDate = new Date();
   }
 
   init();
