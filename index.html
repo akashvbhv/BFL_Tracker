@@ -5,87 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ledger Management System</title>
   
-  <!-- Calligraphy Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playball&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Playball&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 
   <style>
     :root { 
       --primary: #667eea; --secondary: #764ba2; 
       --success: #00d4aa; --danger: #ff6b9d; 
       --warning: #f1c40f; --info: #3498db;
-      --dark: #2c3e50;
+      --dark: #2c3e50; --glass: rgba(255, 255, 255, 0.92);
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-    
-    body { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: var(--dark); }
 
-    /* Title Banner */
-    .title-banner { background: rgba(255, 255, 255, 0.95); margin: 0 auto 25px auto; padding: 25px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.2); max-width: 1300px; }
-    .title-banner h1 { font-family: 'Dancing Script', cursive; font-size: 3.5em; font-weight: 700; background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    
+    body { 
+      background: linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7)), 
+                  url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=2000');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+      min-height: 100vh; padding: 20px; color: var(--dark); 
+    }
+
+    /* Animated Header */
+    .title-banner { 
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      margin: 0 auto 25px auto; padding: 30px; 
+      border-radius: 25px; text-align: center; 
+      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
+      max-width: 1300px;
+    }
+    .title-banner h1 { 
+      font-family: 'Dancing Script', cursive; 
+      font-size: 3.8em; font-weight: 700; color: white;
+      text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
+      animation: fadeInDown 1s ease;
+    }
 
     .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
     
-    /* Sidebar */
-    .sidebar { display: flex; flex-direction: column; gap: 20px; }
-    .sidebar-section { background: rgba(255, 255, 255, 0.9); border-radius: 15px; padding: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    .sidebar h2 { font-size: 0.9em; margin-bottom: 12px; color: var(--secondary); border-bottom: 2px solid #eee; padding-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+    /* Animations */
+    @keyframes fadeInDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
+    .view-transition { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     
-    .tab-btn { 
-      padding: 14px; border-radius: 10px; cursor: pointer; border: none; width: 100%; 
-      font-weight: 600; font-size: 0.95em; transition: 0.3s; display: flex; 
-      justify-content: space-between; align-items: center; margin-bottom: 8px;
+    button:active { transform: scale(0.96); }
+
+    .sidebar-section { 
+      background: var(--glass); border-radius: 20px; padding: 20px; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px;
     }
-    .intro-tab { background: var(--info); color: white; margin-bottom: 0; }
-    .intro-tab:hover { background: #2980b9; transform: translateY(-2px); }
+    .sidebar h2 { font-size: 0.85em; margin-bottom: 12px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
 
-    .person-item { background: white; color: var(--dark); border: 1px solid #eee; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .person-item:hover { border-color: var(--primary); transform: translateX(5px); }
-    .person-item.active { background: var(--primary); color: white; border-color: var(--primary); }
+    /* Dropdown Styles */
+    #memberSelect {
+      width: 100%; padding: 14px; border-radius: 12px;
+      border: 2px solid var(--primary); background: white;
+      font-weight: 600; color: var(--secondary); cursor: pointer; outline: none;
+    }
 
-    .btn-create { background: var(--success); color: white; margin-top: 5px; }
-
-    /* Main Area Views */
-    .main-content { display: flex; flex-direction: column; gap: 20px; }
-    .section { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-    .section h3 { margin-bottom: 15px; font-size: 1.1em; color: var(--secondary); border-left: 4px solid var(--primary); padding-left: 10px; }
-    
-    .protected-content, #authOverlay, #introView { display: none; flex-direction: column; gap: 20px; }
-    #introView { display: flex; }
-    .guide-step { margin-bottom: 20px; padding-left: 15px; border-left: 4px solid var(--info); }
-    .guide-step h4 { color: var(--secondary); margin-bottom: 5px; }
-
-    /* Excel Filter Bar */
-    .filter-bar { background: #f8fafc; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid #eef2f6; }
-    .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
-    .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; }
-
-    #authOverlay { background: white; border-radius: 15px; padding: 50px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); align-items: center; }
-    #authOverlay input { max-width: 300px; text-align: center; font-size: 1.2em; margin: 20px 0; border: 2px solid #ddd; }
+    .section { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .section h3 { margin-bottom: 15px; font-size: 1.2em; color: var(--secondary); border-left: 5px solid var(--primary); padding-left: 12px; }
 
     .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .card { background: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid #eee; }
-    .card .val { font-size: 1.5em; font-weight: 700; margin: 5px 0; }
-    
-    input, select, button, textarea { width: 100%; padding: 12px; border: 2px solid #e8ecf4; border-radius: 8px; outline: none; }
-    button { cursor: pointer; font-weight: 600; border: none; transition: 0.2s; }
-    button:hover { opacity: 0.9; }
+    .card .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; }
+
+    /* Filter Bar */
+    .filter-bar { 
+        background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; 
+        display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid #eef2f6; 
+    }
+    .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
+    .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9em; }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
-    th { background: #f8fafc; color: #7f8c8d; text-transform: uppercase; font-size: 0.75em; cursor: pointer; position: relative; user-select: none; }
-    th:hover { background: #f1f5f9; color: var(--primary); }
-    th.sort-active::after { content: ' ↕'; position: absolute; right: 5px; color: var(--primary); }
+    th { background: #f8fafc; cursor: pointer; color: #7f8c8d; text-transform: uppercase; }
+    .type-emi { background: #fdfaff; font-weight: 600; color: var(--secondary); }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #eef2f6; border-radius: 10px; outline: none; }
+    
+    .btn-main { background: var(--primary); color: white; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
+    .btn-backup { background: var(--dark); color: white; width: 100%; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 0.8em; }
 
-    .type-emi { color: var(--secondary); font-weight: 600; background: #f4f0fa; }
-    .btn-del-icon { background: none; color: var(--danger); border: none; padding: 0; width: auto; font-size: 1.2em; cursor: pointer; }
-    .btn-edit { background: var(--info); padding: 5px 10px; border-radius: 4px; color: white; width: auto; font-size: 0.8em; }
-    .btn-del { background: var(--danger); padding: 5px 10px; border-radius: 4px; color: white; width: auto; font-size: 0.8em; }
-
-    @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .sidebar { order: 2; } .title-banner h1 { font-size: 2.2em; } }
+    .guide-step { margin-bottom: 15px; padding: 10px 15px; border-left: 4px solid var(--info); background: #fcfdfe; border-radius: 0 10px 10px 0; }
+    .guide-step h4 { color: var(--secondary); margin-bottom: 4px; font-size: 0.95em; }
+    .guide-step p { font-size: 0.85em; color: #666; }
   </style>
 </head>
 <body>
@@ -96,128 +110,124 @@
 
 <div class="container">
   <div class="sidebar">
-    <div class="sidebar-section">
-      <button class="tab-btn intro-tab" onclick="showIntroduction()">📖 System Introduction <span>➔</span></button>
-    </div>
-    
-    <div class="sidebar-section">
+    <div class="sidebar-section view-transition">
+      <button class="btn-main" onclick="showIntroduction()" style="width:100%; margin-bottom:15px; background: var(--info);">📖 Quick Guide</button>
+      
       <h2>Active Members</h2>
-      <div id="personList"></div>
+      <select id="memberSelect" onchange="handleMemberChange(this.value)">
+          <option value="">-- Select Member --</option>
+      </select>
+      
+      <button onclick="backupDatabase()" class="btn-backup">💾 Backup All Data (JSON)</button>
     </div>
     
-    <div class="sidebar-section">
-      <h2>Create New Profile</h2>
-      <div style="display: flex; flex-direction: column; gap: 10px;">
-        <input type="text" id="newPersonName" placeholder="Member Name">
-        <input type="password" id="newPersonPass" placeholder="Member Password">
-        <button class="tab-btn btn-create" onclick="addNewPerson()">Create Profile +</button>
-      </div>
+    <div class="sidebar-section view-transition">
+      <h2>Create Profile</h2>
+      <input type="text" id="newPersonName" placeholder="Name" style="margin-bottom:8px;">
+      <input type="password" id="newPersonPass" placeholder="Password" style="margin-bottom:8px;">
+      <button class="btn-main" onclick="addNewPerson()" style="width:100%; background: var(--success);">Create Profile +</button>
+    </div>
+
+    <div class="sidebar-section view-transition" style="border-top: 4px solid var(--danger);">
+      <h2>Master Key</h2>
+      <input type="password" id="masterPassUpdate" placeholder="New Master Key" style="margin-bottom:8px;">
+      <button onclick="updateMasterPassword()" class="btn-backup">Update Master Key</button>
     </div>
   </div>
 
   <div class="main-content">
     
-    <div id="introView" class="section">
-        <h3>Mastering the Ledger System</h3>
-        <p style="margin-bottom: 20px; color: #666;">This application follows the <b>Bajaj Finserv Overdraft</b> logic for accurate loan tracking.</p>
+    <!-- Quick Guide View -->
+    <div id="introView" class="section view-transition">
+        <h3>System Logic Quick Guide</h3>
+        <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">Accurate tracking using <b>Bajaj Finserv Overdraft</b> methodology.</p>
         
         <div class="guide-step">
             <h4>1. User Provisioning</h4>
-            <p>New profiles can be added via the sidebar. Any creation or deletion of a member profile requires the <b>Master Password</b> for authorization.</p>
+            <p>Add profiles via sidebar. Creation or deletion requires the <b>Master Password</b>. If Master is unset, actions are unrestricted.</p>
         </div>
         <div class="guide-step">
-            <h4>2. Interest Calculation logic</h4>
-            <p>The system calculates interest <b>daily</b> based on the closing principal balance. This ensures that payments made mid-month reduce interest costs immediately.</p>
+            <h4>2. Interest Calculation Logic</h4>
+            <p>Calculated <b>daily</b> based on the closing principal balance. Mid-month payments reduce interest costs immediately.</p>
         </div>
         <div class="guide-step">
-            <h4>3. Monthly Capitalization (Accrued Interest)</h4>
-            <p>On the <b>1st of every month</b>, all daily interest accumulated over the previous month is converted into a transaction named "Accrued Interest" and added to the principal balance.</p>
+            <h4>3. Monthly Capitalization</h4>
+            <p>On the <b>1st of every month</b>, accumulated daily interest is converted into an "Accrued Interest" entry and added to the principal.</p>
         </div>
         <div class="guide-step">
-            <h4>4. Corrections & Auditing</h4>
-            <p>Past entries can be edited or deleted. The system will automatically trigger a full recalculation of the timeline to update the current balance instantly.</p>
+            <h4>4. Custom Interest Logic (Per Entry)</h4>
+            <p>Define a <b>Global Rate</b> in settings. Override this for specific periods by entering a <b>Specific Rate</b> in a transaction; it applies until changed.</p>
         </div>
         <div class="guide-step">
-            <h4>5. Security Access</h4>
-            <p>Each ledger is password protected with individual passwords.</p>
+            <h4>5. Corrections & Auditing</h4>
+            <p>Editing or deleting past entries triggers an automatic full timeline recalculation to update current balance instantly.</p>
         </div>
     </div>
 
-    <div id="authOverlay" class="section">
-        <span style="font-size: 4em;">🔒</span>
+    <!-- Auth View -->
+    <div id="authOverlay" class="section view-transition" style="text-align:center; display:none;">
+        <div style="font-size: 4em; margin-bottom: 10px;">🔒</div>
         <h2 id="authMemberName">Select a Member</h2>
-        <p>Enter either the Member Password or the Master Password.</p>
-        <input type="password" id="sessionPassInput" placeholder="Enter Password">
-        <button onclick="unlockMember()" style="padding: 15px 40px; font-size: 1.1em; background: var(--secondary); color: white;">Unlock Ledger</button>
+        <input type="password" id="sessionPassInput" placeholder="Password" style="max-width:300px; text-align:center; margin-bottom:15px;">
+        <br>
+        <button onclick="unlockMember()" class="btn-main" style="padding: 12px 40px; background: var(--secondary);">Unlock Ledger</button>
     </div>
 
-    <div id="protectedArea" class="protected-content">
+    <!-- Ledger View -->
+    <div id="protectedArea" class="view-transition" style="display:none; flex-direction:column; gap:20px;">
         <div class="section" style="text-align: center;">
-            <h2 id="heroTitle">Breakdown</h2>
-            <div style="height: 220px; max-width: 450px; margin: 0 auto;"><canvas id="loanPieChart"></canvas></div>
+            <h2 id="heroTitle" style="font-family: 'Playball', cursive; font-size: 2.5em; color: var(--secondary);">...</h2>
+            <div style="height: 250px; max-width: 450px; margin: 15px auto;"><canvas id="loanPieChart"></canvas></div>
         </div>
 
         <div class="card-row">
-          <div class="card" style="border-color: var(--danger);"><div class="val" id="statBalance" style="color: var(--danger);">₹0</div><div style="font-size: 0.8em; color: #777;">OUTSTANDING</div></div>
-          <div class="card" style="border-color: var(--info);"><div class="val" id="statReceived" style="color: var(--info);">₹0</div><div style="font-size: 0.8em; color: #777;">RECEIVED</div></div>
-          <div class="card" style="border-color: var(--success);"><div class="val" id="statSent" style="color: var(--success);">₹0</div><div style="font-size: 0.8em; color: #777;">SENT</div></div>
-          <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.8em; color: #777;">INTEREST BILLED</div></div>
-        </div>
-
-        <div class="section" style="background: #f4f7ff; border: 1px solid #d0d7de;">
-            <h3>Member Security</h3>
-            <div class="form-grid">
-                <div><label>New Password</label><input type="password" id="changePassInput"></div>
-                <button onclick="changeMemberPassword()" style="background: var(--info); color: white;">Update Password</button>
-                <button onclick="deleteMemberPassword()" style="background: var(--danger); color: white;">Remove Lock</button>
-            </div>
+          <div class="card" style="border-color: var(--danger);"><div class="val" id="statBalance" style="color: var(--danger);">₹0</div><div style="font-size: 0.75em; color: #777;">OUTSTANDING</div></div>
+          <div class="card" style="border-color: var(--info);"><div class="val" id="statReceived" style="color: var(--info);">₹0</div><div style="font-size: 0.75em; color: #777;">RECEIVED</div></div>
+          <div class="card" style="border-color: var(--success);"><div class="val" id="statSent" style="color: var(--success);">₹0</div><div style="font-size: 0.75em; color: #777;">SENT</div></div>
+          <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.75em; color: #777;">INTEREST</div></div>
         </div>
 
         <div class="section">
-          <h3>Interest Settings</h3>
+          <h3>Transaction & Interest</h3>
           <div class="form-grid">
-            <div style="grid-column: span 2;"><label>Global Annual Interest Rate (%)</label><input type="number" id="globalRate" step="0.01"></div>
-            <button onclick="updateSettings()" style="background: var(--secondary); color: white;">Update Rate</button>
-          </div>
-        </div>
-
-        <div class="section">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3>Add Transaction</h3>
-            <button onclick="document.getElementById('csvFileInput').click()" style="background: #27ae60; color: white; width: auto; padding: 8px 15px; font-size: 0.8em;">Import CSV</button>
-            <input type="file" id="csvFileInput" accept=".csv" style="display:none" onchange="handleCSVImport(event)">
-          </div>
-          <div class="form-grid">
-            <div><label>Type</label><select id="tType"><option value="lent">I Lent Money (+)</option><option value="received">I Received Money (-)</option></select></div>
-            <div><label>Amount (₹)</label><input type="number" id="tAmount" placeholder="0.00"></div>
-            <div><label>Date</label><input type="date" id="tDate"></div>
-            <div style="grid-column: span 2;"><label>Notes</label><textarea id="tComment" placeholder="Details..." rows="1" style="height:44px"></textarea></div>
+            <div><label style="font-size:0.8em">Global Rate %</label><input type="number" id="globalRate" step="0.01"></div>
+            <button onclick="updateSettings()" class="btn-main" style="align-self:end; background: var(--secondary);">Update Global Rate</button>
+            <div style="grid-column: span 2; height: 1px; background: #eee; margin: 5px 0;"></div>
+            <div><label style="font-size:0.8em">Type</label><select id="tType"><option value="lent">➕ Lent Money</option><option value="received">➖ Received Money</option></select></div>
+            <div><label style="font-size:0.8em">Amount (₹)</label><input type="number" id="tAmount" placeholder="0.00"></div>
+            <div><label style="font-size:0.8em">Date</label><input type="date" id="tDate"></div>
+            <div><label style="font-size:0.8em">Specific Rate % (Optional)</label><input type="number" id="tRate" step="0.01"></div>
+            <div style="grid-column: span 2;"><label style="font-size:0.8em">Notes</label><textarea id="tComment" rows="1"></textarea></div>
             <input type="hidden" id="editIdx" value="-1">
-            <button onclick="handleTransaction()" id="submitBtn" style="background: var(--primary); color: white;">Save Record</button>
+            <button onclick="handleTransaction()" id="submitBtn" class="btn-main" style="grid-column: span 2;">Save Entry</button>
           </div>
         </div>
 
-        <!-- History -->
         <div class="section">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3>History</h3>
-            <button onclick="exportToCSV()" style="background: #555; color: white; width: auto; padding: 8px 15px; font-size: 0.8em;">Export CSV</button>
+            <div style="display:flex; gap:8px;">
+                <button onclick="generatePDF()" style="background:#e74c3c; color:white; padding:6px 12px; border-radius:8px; font-size:0.75em; border:none;">PDF</button>
+                <button onclick="exportToCSV()" style="background:#34495e; color:white; padding:6px 12px; border-radius:8px; font-size:0.75em; border:none;">CSV</button>
+            </div>
           </div>
 
           <div class="filter-bar">
             <div class="filter-group"><span>🔍</span><input type="text" id="filterSearch" placeholder="Search notes..." onkeyup="updateUI()"></div>
-            <div class="filter-group"><span>Type:</span><select id="filterType" onchange="updateUI()"><option value="all">All Entries</option><option value="lent">Sent Only</option><option value="received">Received Only</option><option value="interest_emi">Accrued Interest</option></select></div>
+            <div class="filter-group"><span>From:</span><input type="date" id="filterStart" onchange="updateUI()"></div>
+            <div class="filter-group"><span>To:</span><input type="date" id="filterEnd" onchange="updateUI()"></div>
+            <div class="filter-group"><span>Type:</span><select id="filterType" onchange="updateUI()"><option value="all">All</option><option value="lent">Sent</option><option value="received">Recv</option><option value="interest_emi">Interest</option></select></div>
           </div>
 
           <div style="overflow-x: auto;">
             <table>
               <thead>
                 <tr>
-                  <th onclick="setSort('date')" id="th-date">Date</th>
-                  <th onclick="setSort('type')" id="th-type">Type</th>
-                  <th onclick="setSort('amount')" id="th-amount">Amount</th>
-                  <th onclick="setSort('balance')" id="th-balance">Closing Balance</th>
-                  <th onclick="setSort('comment')" id="th-comment">Notes</th>
+                  <th onclick="setSort('date')">Date</th>
+                  <th onclick="setSort('type')">Type</th>
+                  <th onclick="setSort('amount')">Amount</th>
+                  <th onclick="setSort('balance')">Balance</th>
+                  <th>Notes</th>
                   <th>Actions</th>
                 </tr>
               </thead>
@@ -230,7 +240,7 @@
 </div>
 
 <script>
-  // --- FIREBASE CONFIG ---
+  // --- CONFIG ---
   const firebaseConfig = {
     apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
     authDomain: "vaibhav-s-ledger.firebaseapp.com",
@@ -245,31 +255,217 @@
   const db = firebase.database();
 
   let currentPersonId = null, allPeople = {}, myPieChart = null, unlockedSessions = {}; 
-  let sortCol = 'date', sortDir = -1;
-  
-  // Master password: akash8995
-  const MASTER_HASH = "307d89693952796e9526715f5e55ee1893c78a0c20a9a838561d5f30832049c8";
+  let sortCol = 'date', sortDir = -1, masterHash = "";
 
-  // Highly robust SHA-256 for local/non-HTTPS use
   function sha256(ascii) {
     function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
     var mathPow = Math.pow, maxWord = mathPow(2, 32), result = '', words = [], asciiLength = ascii.length, hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], primeCounter = k.length;
     var isComposite = {};
-    for (var i = 2; primeCounter < 64; i++) {
-        if (!isComposite[i]) {
-            for (var j = i << 1; j < 313; j += i) isComposite[j] = i;
-            hash[primeCounter] = (mathPow(i, .5) * maxWord) | 0;
-            k[primeCounter++] = (mathPow(i, 1 / 3) * maxWord) | 0;
-        }
-    }
-    ascii += '\x80';
-    while (ascii.length % 64 - 56) ascii += '\x00';
-    for (i = 0; i < ascii.length; i++) {
-        var j = ascii.charCodeAt(i);
-        if (j >> 8) return;
-        words[i >> 2] |= j << ((3 - i) % 4) * 8;
-    }
-    words[words.length] = ((asciiLength / 8) / maxWord) | 0;
-    words[words.length] = (asciiLength * 8) | 0;
+    for (var i = 2; primeCounter < 64; i++) { if (!isComposite[i]) { for (var j = i << 1; j < 313; j += i) isComposite[j] = i; hash[primeCounter] = (mathPow(i, .5) * maxWord) | 0; k[primeCounter++] = (mathPow(i, 1 / 3) * maxWord) | 0; } }
+    ascii += '\x80'; while (ascii.length % 64 - 56) ascii += '\x00';
+    for (i = 0; i < ascii.length; i++) { var j = ascii.charCodeAt(i); words[i >> 2] |= j << ((3 - i) % 4) * 8; }
+    words[words.length] = ((asciiLength / 8) / maxWord) | 0; words[words.length] = (asciiLength * 8) | 0;
     for (j = 0; j < words.length; ) {
         var w = words.slice(j, j += 64), oldHash = hash.slice(0);
+        for (i = 0; i < 64; i++) {
+            var w15 = w[i - 15], w2 = w[i - 2], a = hash[0], e = hash[4], temp1 = hash[7] + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) + ((e & hash[5]) ^ (~e & hash[6])) + k[i] + (w[i] = (i < 16) ? w[i] : (w[i - 16] + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) + w[i - 7] + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) | 0), temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            hash = [(temp1 + temp2) | 0].concat(hash); hash[4] = (hash[4] + temp1) | 0;
+        }
+        for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+    }
+    for (i = 0; i < 8; i++) { for (j = 3; j + 1; j--) { var b = (hash[i] >> (j * 8)) & 255; result += (b < 16 ? '0' : '') + b.toString(16); } }
+    return result;
+  }
+
+  function init() {
+    document.getElementById('tDate').valueAsDate = new Date();
+    db.ref('masterHash').on('value', snap => masterHash = snap.val() || "");
+    db.ref('ledger').on('value', snap => {
+      allPeople = snap.val() || {};
+      renderDropdown();
+      if (currentPersonId) updateUI();
+    });
+  }
+
+  function renderDropdown() {
+    const sel = document.getElementById('memberSelect');
+    const cur = sel.value; sel.innerHTML = '<option value="">-- Select Member --</option>';
+    Object.keys(allPeople).forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id; opt.text = allPeople[id].name + (unlockedSessions[id] ? " 🔓" : " 🔒");
+      sel.appendChild(opt);
+    });
+    sel.value = cur;
+  }
+
+  function handleMemberChange(id) {
+    if(!id) return showIntroduction();
+    currentPersonId = id;
+    const view = document.querySelector('.main-content');
+    view.style.animation = 'none'; void view.offsetWidth; view.style.animation = 'slideUp 0.5s ease';
+    checkAuthAndRender();
+  }
+
+  function showIntroduction() {
+    currentPersonId = null;
+    document.getElementById('introView').style.display = 'flex';
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('protectedArea').style.display = 'none';
+    document.getElementById('memberSelect').value = "";
+  }
+
+  function verifyMaster() {
+    if(!masterHash) return true;
+    const p = prompt("Master Key Required:");
+    return p && sha256(p.trim()) === masterHash;
+  }
+
+  function unlockMember() {
+    const typed = document.getElementById('sessionPassInput').value.trim();
+    const hashed = sha256(typed);
+    if(hashed === allPeople[currentPersonId].password || (masterHash && hashed === masterHash)) {
+      unlockedSessions[currentPersonId] = true;
+      document.getElementById('sessionPassInput').value = "";
+      checkAuthAndRender(); renderDropdown();
+    } else alert("Denied");
+  }
+
+  function checkAuthAndRender() {
+    const person = allPeople[currentPersonId];
+    if(!person.password) unlockedSessions[currentPersonId] = true;
+    if(unlockedSessions[currentPersonId]) {
+      document.getElementById('introView').style.display = 'none';
+      document.getElementById('authOverlay').style.display = 'none';
+      document.getElementById('protectedArea').style.display = 'flex';
+      document.getElementById('heroTitle').innerText = person.name + "'s Ledger";
+      updateUI();
+    } else {
+      document.getElementById('introView').style.display = 'none';
+      document.getElementById('authOverlay').style.display = 'block';
+      document.getElementById('protectedArea').style.display = 'none';
+      document.getElementById('authMemberName').innerText = person.name;
+    }
+  }
+
+  function updateUI() {
+    const person = allPeople[currentPersonId];
+    document.getElementById('globalRate').value = person.globalRate || 0;
+    
+    let userT = (person.transactions || []).filter(t => t.type !== 'interest_emi');
+    userT.sort((a,b) => new Date(a.date) - new Date(b.date));
+    
+    let timeline = [], bal = 0, intAccum = 0, stats = {s:0, r:0, i:0};
+    let currentRate = person.globalRate || 0;
+
+    if (userT.length > 0) {
+      let curr = new Date(userT[0].date); curr.setHours(0,0,0,0);
+      let end = new Date(); end.setHours(23,59,59);
+      while (curr <= end) {
+        if (curr.getDate() === 1 && intAccum > 0) {
+          bal += intAccum; stats.i += intAccum;
+          timeline.push({ id: 'I'+curr.getTime(), date: curr.toISOString().split('T')[0], type:'interest_emi', amount: intAccum, balance: bal, comment: 'Accrued Interest'});
+          intAccum = 0;
+        }
+        userT.filter(t => t.date === curr.toISOString().split('T')[0]).forEach(t => {
+          if (t.type === 'lent') { bal += t.amount; stats.s += t.amount; }
+          else { bal -= t.amount; stats.r += t.amount; }
+          if (t.rate !== undefined && t.rate !== "" && t.rate !== null) currentRate = parseFloat(t.rate);
+          else currentRate = person.globalRate || 0;
+          timeline.push({...t, balance: bal, activeRate: currentRate});
+        });
+        if (bal > 0 && currentRate > 0) intAccum += bal * (currentRate / 100 / 365);
+        curr.setDate(curr.getDate() + 1);
+      }
+    }
+
+    document.getElementById('statBalance').innerText = '₹' + Math.round(bal).toLocaleString();
+    document.getElementById('statReceived').innerText = '₹' + Math.round(stats.r).toLocaleString();
+    document.getElementById('statSent').innerText = '₹' + Math.round(stats.s).toLocaleString();
+    document.getElementById('statInterest').innerText = '₹' + Math.round(stats.i).toLocaleString();
+    
+    updatePie(stats.s, stats.i, stats.r);
+
+    const search = document.getElementById('filterSearch').value.toLowerCase();
+    const typeFilt = document.getElementById('filterType').value;
+    const sDate = document.getElementById('filterStart').value;
+    const eDate = document.getElementById('filterEnd').value;
+
+    let filtered = timeline.filter(t => {
+        const matchesDate = (!sDate || t.date >= sDate) && (!eDate || t.date <= eDate);
+        return (t.comment || '').toLowerCase().includes(search) && 
+               (typeFilt === 'all' || t.type === typeFilt) && matchesDate;
+    });
+
+    filtered.sort((a,b) => {
+        let vA = a[sortCol], vB = b[sortCol];
+        if (sortCol === 'date') { vA = new Date(vA); vB = new Date(vB); }
+        else if (sortCol === 'amount' || sortCol === 'balance') { vA = parseFloat(vA); vB = parseFloat(vB); }
+        return (vA < vB ? -1 : 1) * sortDir;
+    });
+
+    const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
+    filtered.forEach(t => {
+      const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
+      const rateLabel = t.rate ? `<span style="font-size:0.7em; color:var(--primary)">@${t.rate}%</span>` : '';
+      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'} ${rateLabel}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button onclick="editEntry(\''+t.id+'\')" style="border:none; background:none; cursor:pointer;">✏️</button> <button onclick="deleteEntry(\''+t.id+'\')" style="border:none; background:none; cursor:pointer; color:red;">🗑️</button>':'-'}</td>`;
+    });
+  }
+
+  function handleTransaction() {
+    const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, rate = document.getElementById('tRate').value, editId = document.getElementById('editIdx').value;
+    if (!amount || !date) return alert("Missing data");
+    let person = allPeople[currentPersonId]; if (!person.transactions) person.transactions = [];
+    const entryData = { id: editId === "-1" ? 'T'+Date.now() : editId, type, amount, date, comment, rate: rate===""?null:parseFloat(rate) };
+    if (editId === "-1") person.transactions.push(entryData);
+    else { const idx = person.transactions.findIndex(t => t.id === editId); person.transactions[idx] = entryData; }
+    db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
+    resetForm();
+  }
+
+  function backupDatabase() {
+    if (verifyMaster()) {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allPeople, null, 2));
+        const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `ledger_backup.json`); dl.click();
+    }
+  }
+
+  function updateMasterPassword() {
+    const np = document.getElementById('masterPassUpdate').value.trim();
+    if(verifyMaster()) { db.ref('masterHash').set(np ? sha256(np) : ""); alert("Updated"); document.getElementById('masterPassUpdate').value = ""; }
+  }
+
+  function addNewPerson() {
+    const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim();
+    if(name && verifyMaster()) { db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = ''; }
+  }
+
+  function updatePie(s, i, r) {
+    const ctx = document.getElementById('loanPieChart').getContext('2d');
+    if (myPieChart) myPieChart.destroy();
+    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
+  }
+
+  function generatePDF() {
+    const { jsPDF } = window.jspdf; const doc = new jsPDF();
+    doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20);
+    const rows = []; document.querySelectorAll("#historyBody tr").forEach(tr => { const cols = tr.querySelectorAll("td"); rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]); });
+    doc.autoTable({ head: [['Date', 'Type', 'Amount', 'Balance', 'Notes']], body: rows, startY: 25 });
+    doc.save('statement.pdf');
+  }
+
+  function exportToCSV() {
+    let csv = "Date,Type,Amount,Notes\n";
+    allPeople[currentPersonId].transactions.forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`);
+    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click();
+  }
+
+  function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
+  function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
+  function editEntry(id) { const e = allPeople[currentPersonId].transactions.find(t => t.id === id); document.getElementById('tType').value = e.type; document.getElementById('tAmount').value = e.amount; document.getElementById('tDate').value = e.date; document.getElementById('tComment').value = e.comment || ''; document.getElementById('tRate').value = e.rate || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update Entry"; }
+  function deleteEntry(id) { if(confirm("Delete?")) db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); }
+  function updateSettings() { db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value)); }
+
+  init();
+</script>
+</body>
+</html>
