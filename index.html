@@ -19,16 +19,13 @@
       --warning: #f1c40f; --info: #3498db;
       --dark: #2c3e50; --glass: rgba(255, 255, 255, 0.92);
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    
     body { 
       background: linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7)), 
                   url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=2000');
       background-size: cover; background-attachment: fixed; background-position: center;
       min-height: 100vh; padding: 20px; color: var(--dark); 
     }
-
     .title-banner { 
       background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.3); margin: 0 auto 25px auto; padding: 30px; 
@@ -38,44 +35,32 @@
       font-family: 'Dancing Script', cursive; font-size: 3.8em; font-weight: 700; color: white;
       text-shadow: 2px 4px 8px rgba(0,0,0,0.3); animation: fadeInDown 1s ease;
     }
-
     .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-    
     @keyframes fadeInDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
     .view-transition { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-    
     .sidebar-section { background: var(--glass); border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px; }
     .sidebar h2 { font-size: 0.85em; margin-bottom: 12px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-
     input, select, textarea { width: 100%; padding: 12px; border: 2px solid #eef2f6; border-radius: 10px; outline: none; margin-bottom: 10px; font-size: 0.9em; }
     button { cursor: pointer; border: none; font-weight: 600; transition: 0.2s; border-radius: 10px; padding: 12px; }
     button:active { transform: scale(0.96); }
-
     .section { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .section h3 { margin-bottom: 15px; font-size: 1.2em; color: var(--secondary); border-left: 5px solid var(--primary); padding-left: 12px; }
-
     .card-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
     .card { background: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid #eee; }
     .card .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; }
-
     .filter-bar { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid #eef2f6; }
     .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.8em; }
     .filter-bar input, .filter-bar select { margin-bottom: 0; padding: 8px; width: auto; }
-
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
     th { background: #f8fafc; color: #7f8c8d; cursor: pointer; }
     .type-emi { background: #fdfaff; font-weight: 600; color: var(--secondary); }
-
     .btn-primary { background: var(--primary); color: white; width: 100%; }
     .btn-danger { background: var(--danger); color: white; width: 100%; }
     .btn-dark { background: var(--dark); color: white; width: 100%; }
     .btn-success { background: var(--success); color: white; width: 100%; }
-
-    .guide-step { margin-bottom: 15px; padding: 10px 15px; border-left: 4px solid var(--info); background: #fcfdfe; border-radius: 0 10px 10px 0; }
-    .guide-step h4 { color: var(--secondary); margin-bottom: 4px; font-size: 0.95em; }
-    .guide-step p { font-size: 0.85em; color: #666; }
+    .action-btn { background: none; border: none; font-size: 1.2em; padding: 0 5px; cursor: pointer; }
   </style>
 </head>
 <body>
@@ -88,14 +73,14 @@
   <div class="sidebar">
     <div class="sidebar-section view-transition">
       <button class="btn-primary" onclick="showIntroduction()" style="margin-bottom:15px; background: var(--info);">📖 Quick Guide</button>
-      
       <h2>Active Members</h2>
       <select id="memberSelect" onchange="handleMemberChange(this.value)">
           <option value="">-- Select Member --</option>
       </select>
-      
-      <button onclick="confirmDeleteMember()" class="btn-danger" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">🗑️ Delete Selected Member</button>
-      <button onclick="backupDatabase()" class="btn-dark" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">💾 Backup All Data</button>
+      <button onclick="confirmDeleteMember()" class="btn-danger" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">🗑️ Delete Member</button>
+      <button onclick="backupDatabase()" class="btn-dark" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">💾 Backup Database</button>
+      <button onclick="document.getElementById('restoreInput').click()" class="btn-dark" style="margin-top: 5px; padding: 8px; font-size: 0.8em; background: #555;">📂 Restore Backup</button>
+      <input type="file" id="restoreInput" style="display:none" accept=".json" onchange="restoreFullDatabase(event)">
     </div>
     
     <div class="sidebar-section view-transition">
@@ -107,7 +92,6 @@
 
     <div class="sidebar-section view-transition" style="border-top: 4px solid var(--danger);">
       <h2>System Master Key</h2>
-      <p style="font-size: 0.7em; color: #666; margin-bottom: 10px;">Needed for admin tasks.</p>
       <input type="password" id="oldMasterPass" placeholder="Current Master Key">
       <input type="password" id="newMasterPass" placeholder="New Master Key">
       <button onclick="updateMasterPassword()" class="btn-dark">Update Master Key</button>
@@ -115,44 +99,29 @@
   </div>
 
   <div class="main-content">
-    
     <div id="introView" class="section view-transition">
         <h3>System Logic Quick Guide</h3>
         <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">Accurate tracking using <b>Bajaj Finserv Overdraft</b> methodology.</p>
-        
-        <div class="guide-step">
-            <h4>1. User Provisioning</h4>
-            <p>Add/Delete profiles via sidebar. These actions require the <b>Master Password</b>. If no Master key is set, anyone can manage profiles.</p>
-        </div>
-        <div class="guide-step">
-            <h4>2. Interest Calculation Logic</h4>
-            <p>Calculated <b>daily</b> based on the closing principal balance. Mid-month payments reduce interest costs immediately.</p>
-        </div>
-        <div class="guide-step">
-            <h4>3. Monthly Capitalization</h4>
-            <p>On the <b>1st of every month</b>, accumulated daily interest is converted into an "Accrued Interest" entry and added to the principal balance.</p>
-        </div>
-        <div class="guide-step">
-            <h4>4. Custom Interest Logic (Per Entry)</h4>
-            <p>Define a <b>Global Rate</b> in settings. Override this for specific periods by entering a <b>Specific Rate</b> in a transaction.</p>
-        </div>
-        <div class="guide-step">
-            <h4>5. Corrections & Auditing</h4>
-            <p>All manual entries are <b>deletable</b>. Deleting an entry triggers a full recalculation of the history to ensure balance integrity.</p>
-        </div>
+        <div class="guide-step"><h4>1. User Provisioning</h4><p>Add/Delete profiles via sidebar. These actions require the <b>Master Password</b>.</p></div>
+        <div class="guide-step"><h4>2. Interest Calculation Logic</h4><p>Calculated <b>daily</b> based on closing principal balance. Mid-month payments reduce interest immediately.</p></div>
+        <div class="guide-step"><h4>3. Monthly Capitalization</h4><p>On the <b>1st of every month</b>, interest is converted into an "Accrued Interest" entry and added to the principal.</p></div>
+        <div class="guide-step"><h4>4. Custom Interest Logic</h4><p>Define a <b>Global Rate</b> or override it using a <b>Specific Rate</b> within any transaction.</p></div>
+        <div class="guide-step"><h4>5. Corrections & Auditing</h4><p>All manual entries are <b>deletable</b>. System interest rows are updated automatically based on your manual changes.</p></div>
     </div>
 
     <div id="authOverlay" class="section view-transition" style="text-align:center; display:none;">
         <div style="font-size: 4em; margin-bottom: 10px;">🔒</div>
         <h2 id="authMemberName">Select a Member</h2>
         <input type="password" id="sessionPassInput" placeholder="Enter Password" style="max-width:300px; text-align:center;">
-        <br>
-        <button onclick="unlockMember()" class="btn-primary" style="padding: 12px 40px; width: auto; background: var(--secondary);">Unlock Ledger</button>
+        <br><button onclick="unlockMember()" class="btn-primary" style="padding: 12px 40px; width: auto; background: var(--secondary);">Unlock Ledger</button>
     </div>
 
     <div id="protectedArea" class="view-transition" style="display:none; flex-direction:column; gap:20px;">
         <div class="section" style="text-align: center;">
-            <h2 id="heroTitle" style="font-family: 'Playball', cursive; font-size: 2.5em; color: var(--secondary);">...</h2>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 id="heroTitle" style="font-family: 'Playball', cursive; font-size: 2.5em; color: var(--secondary);">...</h2>
+                <button onclick="updateUI()" style="background:var(--info); color:white; padding:5px 15px; font-size:0.7em;">🔄 Force Recalc</button>
+            </div>
             <div style="height: 250px; max-width: 450px; margin: 15px auto;"><canvas id="loanPieChart"></canvas></div>
         </div>
 
@@ -163,18 +132,26 @@
           <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.75em; color: #777;">INTEREST</div></div>
         </div>
 
-        <!-- NEW: Member Security Section -->
+        <!-- REFACTORED MEMBER SECURITY -->
         <div class="section" style="background: #fdf2f5; border: 1px solid #ffdce0;">
           <h3>Member Security</h3>
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
-            <div><label style="font-size: 0.8em;">Update Password</label><input type="password" id="memberPassUpdate" style="margin-bottom:0"></div>
-            <button onclick="changeMemberPassword()" class="btn-primary" style="background: var(--info);">Save Password</button>
+          <p style="font-size: 0.7em; color: #777; margin-bottom: 10px;">You can set, change, or clear the member's password. The Master Key works as confirmation.</p>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end;">
+            <div><label style="font-size: 0.7em;">New Member Password</label><input type="password" id="memberPassNew" style="margin-bottom:0" placeholder="New Password"></div>
+            <div><label style="font-size: 0.7em;">Confirm with Current/Master Pass</label><input type="password" id="memberPassVerify" style="margin-bottom:0" placeholder="Verification"></div>
+            <button onclick="changeMemberPassword()" class="btn-primary" style="background: var(--info);">Update Password</button>
             <button onclick="removeMemberPassword()" class="btn-danger">Remove Lock (Public)</button>
           </div>
         </div>
 
         <div class="section">
-          <h3>Transaction & Rates</h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h3>Transactions</h3>
+            <div style="display:flex; gap:8px;">
+                <button onclick="document.getElementById('csvTransInput').click()" style="background: #27ae60; color: white; padding: 6px 12px; font-size: 0.75em;">Import CSV</button>
+                <input type="file" id="csvTransInput" style="display:none" accept=".csv" onchange="handleCSVTransactionImport(event)">
+            </div>
+          </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div><label style="font-size:0.8em">Global Annual Rate %</label><input type="number" id="globalRate" step="0.01"></div>
             <button onclick="updateSettings()" class="btn-dark" style="align-self:end; margin-bottom: 10px;">Update Global Rate</button>
@@ -195,29 +172,21 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3>History</h3>
             <div style="display:flex; gap:8px;">
+                <button onclick="clearAllHistory()" style="background:#000; color:white; padding:6px 12px; font-size:0.75em;">Clear All History</button>
                 <button onclick="generatePDF()" style="background:#e74c3c; color:white; padding:6px 12px; font-size:0.75em;">PDF</button>
                 <button onclick="exportToCSV()" style="background:#34495e; color:white; padding:6px 12px; font-size:0.75em;">CSV</button>
             </div>
           </div>
-
           <div class="filter-bar">
             <div class="filter-group"><span>🔍</span><input type="text" id="filterSearch" placeholder="Search..." onkeyup="updateUI()"></div>
             <div class="filter-group"><span>From:</span><input type="date" id="filterStart" onchange="updateUI()"></div>
             <div class="filter-group"><span>To:</span><input type="date" id="filterEnd" onchange="updateUI()"></div>
             <div class="filter-group"><span>Type:</span><select id="filterType" onchange="updateUI()"><option value="all">All</option><option value="lent">Sent</option><option value="received">Recv</option><option value="interest_emi">Interest</option></select></div>
           </div>
-
           <div style="overflow-x: auto;">
             <table>
               <thead>
-                <tr>
-                  <th onclick="setSort('date')">Date</th>
-                  <th onclick="setSort('type')">Type</th>
-                  <th onclick="setSort('amount')">Amount</th>
-                  <th onclick="setSort('balance')">Balance</th>
-                  <th>Notes</th>
-                  <th>Actions</th>
-                </tr>
+                <tr><th onclick="setSort('date')">Date</th><th onclick="setSort('type')">Type</th><th onclick="setSort('amount')">Amount</th><th onclick="setSort('balance')">Balance</th><th>Notes</th><th>Actions</th></tr>
               </thead>
               <tbody id="historyBody"></tbody>
             </table>
@@ -228,7 +197,7 @@
 </div>
 
 <script>
-  // --- CONFIG ---
+  // --- CORE SYSTEM & FIREBASE ---
   const firebaseConfig = {
     apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
     authDomain: "vaibhav-s-ledger.firebaseapp.com",
@@ -238,10 +207,8 @@
     messagingSenderId: "199650798840",
     appId: "1:199650798840:web:06ff1415dd60a603f39f0d"
   };
-
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-
   let currentPersonId = null, allPeople = {}, myPieChart = null, unlockedSessions = {}; 
   let sortCol = 'date', sortDir = -1, masterHash = "";
 
@@ -286,32 +253,15 @@
     sel.value = cur;
   }
 
-  function handleMemberChange(id) {
-    if(!id) return showIntroduction();
-    currentPersonId = id;
-    const view = document.querySelector('.main-content');
-    view.style.animation = 'none'; void view.offsetWidth; view.style.animation = 'slideUp 0.5s ease';
-    checkAuthAndRender();
-  }
-
-  function showIntroduction() {
-    currentPersonId = null;
-    document.getElementById('introView').style.display = 'flex';
-    document.getElementById('authOverlay').style.display = 'none';
-    document.getElementById('protectedArea').style.display = 'none';
-    document.getElementById('memberSelect').value = "";
-  }
-
-  function verifyMaster() {
-    if(!masterHash) return true;
-    const p = prompt("Master Password Required:");
-    return p && sha256(p.trim()) === masterHash;
-  }
-
+  function handleMemberChange(id) { if(!id) return showIntroduction(); currentPersonId = id; checkAuthAndRender(); }
+  function showIntroduction() { currentPersonId = null; document.getElementById('introView').style.display = 'flex'; document.getElementById('authOverlay').style.display = 'none'; document.getElementById('protectedArea').style.display = 'none'; document.getElementById('memberSelect').value = ""; }
+  
+  // HIDDEN MASTER BYPASS LOGIC
   function unlockMember() {
     const typed = document.getElementById('sessionPassInput').value.trim();
     const hashed = sha256(typed);
-    if(hashed === allPeople[currentPersonId].password || (masterHash && hashed === masterHash)) {
+    const personPass = allPeople[currentPersonId].password;
+    if(hashed === personPass || (masterHash && hashed === masterHash)) {
       unlockedSessions[currentPersonId] = true;
       document.getElementById('sessionPassInput').value = "";
       checkAuthAndRender(); renderDropdown();
@@ -339,7 +289,13 @@
     const person = allPeople[currentPersonId];
     document.getElementById('globalRate').value = person.globalRate || 0;
     
-    let userT = (person.transactions || []).filter(t => t.type !== 'interest_emi');
+    // Self-Healing Ids
+    let transactions = (person.transactions || []).map(t => {
+        if (!t.id) { t.id = 'T' + Date.now() + Math.floor(Math.random() * 1000); }
+        return t;
+    });
+
+    let userT = transactions.filter(t => t.type !== 'interest_emi');
     userT.sort((a,b) => new Date(a.date) - new Date(b.date));
     
     let timeline = [], bal = 0, intAccum = 0, stats = {s:0, r:0, i:0};
@@ -351,7 +307,7 @@
       while (curr <= end) {
         if (curr.getDate() === 1 && intAccum > 0) {
           bal += intAccum; stats.i += intAccum;
-          timeline.push({ id: 'I'+curr.getTime(), date: curr.toISOString().split('T')[0], type:'interest_emi', amount: intAccum, balance: bal, comment: 'Accrued Interest'});
+          timeline.push({ id: 'SYS_'+curr.getTime(), date: curr.toISOString().split('T')[0], type:'interest_emi', amount: intAccum, balance: bal, comment: 'Accrued Interest'});
           intAccum = 0;
         }
         userT.filter(t => t.date === curr.toISOString().split('T')[0]).forEach(t => {
@@ -392,105 +348,89 @@
 
     const tbody = document.getElementById('historyBody'); tbody.innerHTML = '';
     filtered.forEach(t => {
-      const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
-      const rateLabel = t.rate ? `<span style="font-size:0.7em; color:var(--primary)">@${t.rate}%</span>` : '';
-      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'} ${rateLabel}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button onclick="editEntry(\''+t.id+'\')" style="background:none; color:blue; padding:2px;">✏️</button> <button onclick="deleteEntry(\''+t.id+'\')" style="background:none; color:red; padding:2px;">🗑️</button>':'-'}</td>`;
+      const isManual = !t.id.startsWith('SYS_');
+      const row = tbody.insertRow(); if(!isManual) row.className = 'type-emi';
+      const rateLabel = t.rate ? `<span style="font-size:0.75em; color:var(--primary)">@${t.rate}%</span>` : '';
+      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'} ${rateLabel}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td style="white-space:nowrap;">${isManual ? `<button onclick="editEntry('${t.id}')" class="action-btn">✏️</button><button onclick="deleteEntry('${t.id}')" class="action-btn" style="color:red;">🗑️</button>` : '-'}</td>`;
     });
   }
 
-  // --- MODIFICATION 1: Master Password with check ---
-  function updateMasterPassword() {
-    const oldP = document.getElementById('oldMasterPass').value.trim();
-    const newP = document.getElementById('newMasterPass').value.trim();
-    
-    if (masterHash && sha256(oldP) !== masterHash) return alert("Current Master Password incorrect.");
-    
-    db.ref('masterHash').set(newP ? sha256(newP) : "");
-    alert("Master Password Updated.");
-    document.getElementById('oldMasterPass').value = ""; document.getElementById('newMasterPass').value = "";
-  }
-
-  // --- MODIFICATION 2: Profile Management ---
-  function addNewPerson() {
-    const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim();
-    if(name && verifyMaster()) { 
-        db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); 
-        document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = '';
-    }
-  }
-
-  function confirmDeleteMember() {
-    const id = document.getElementById('memberSelect').value;
-    if(!id) return alert("Select a member first");
-    if(verifyMaster()) {
-        if(confirm(`Permanently delete ${allPeople[id].name}?`)) { db.ref(`ledger/${id}`).remove(); showIntroduction(); }
-    }
-  }
-
-  // --- MODIFICATION 3: Member Password Changes ---
+  // --- ACTIONS ---
   function changeMemberPassword() {
-    const np = document.getElementById('memberPassUpdate').value.trim();
-    if(!np) return alert("Enter a new password");
-    db.ref(`ledger/${currentPersonId}/password`).set(sha256(np));
-    alert("Member password updated!"); document.getElementById('memberPassUpdate').value = "";
+    const newP = document.getElementById('memberPassNew').value.trim();
+    const verifyP = document.getElementById('memberPassVerify').value.trim();
+    const hashedVerify = sha256(verifyP);
+    const personPass = allPeople[currentPersonId].password;
+
+    if (!verifyP) return alert("Verification password required.");
+    
+    if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
+        db.ref(`ledger/${currentPersonId}/password`).set(newP ? sha256(newP) : "");
+        alert("Member password updated successfully.");
+        document.getElementById('memberPassNew').value = "";
+        document.getElementById('memberPassVerify').value = "";
+    } else {
+        alert("Verification failed. Incorrect member or master password.");
+    }
   }
 
   function removeMemberPassword() {
-    if(confirm("Remove password? This ledger will be open to everyone.")) {
+    const verifyP = document.getElementById('memberPassVerify').value.trim();
+    const hashedVerify = sha256(verifyP);
+    const personPass = allPeople[currentPersonId].password;
+
+    if (!verifyP) return alert("Verification required to remove lock.");
+
+    if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
         db.ref(`ledger/${currentPersonId}/password`).set("");
-        alert("Password removed.");
+        alert("Password lock removed.");
+        document.getElementById('memberPassVerify').value = "";
+    } else {
+        alert("Verification failed.");
     }
   }
 
-  // --- MODIFICATION 5: All Entries Deletable ---
-  function deleteEntry(id) {
-    if(confirm("Permanently delete this entry? Balance will be recalculated.")) {
-        db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
+  function clearAllHistory() {
+    const pass = prompt("WARNING: This will delete ALL transactions for this member. Type Master Password to confirm:");
+    if (pass && masterHash && sha256(pass) === masterHash) {
+        db.ref(`ledger/${currentPersonId}/transactions`).set([]);
+        alert("History cleared. Outstanding reset to ₹0.");
+    } else if (pass) {
+        alert("Invalid Master Password.");
     }
   }
 
-  // --- HELPERS ---
   function handleTransaction() {
     const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, rate = document.getElementById('tRate').value, editId = document.getElementById('editIdx').value;
     if (!amount || !date) return alert("Missing data");
     let person = allPeople[currentPersonId]; if (!person.transactions) person.transactions = [];
     const entryData = { id: editId === "-1" ? 'T'+Date.now() : editId, type, amount, date, comment, rate: rate===""?null:parseFloat(rate) };
     if (editId === "-1") person.transactions.push(entryData);
-    else { const idx = person.transactions.findIndex(t => t.id === editId); person.transactions[idx] = entryData; }
+    else { const idx = person.transactions.findIndex(t => t.id === editId); if (idx !== -1) person.transactions[idx] = entryData; }
     db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions);
     resetForm();
   }
 
-  function backupDatabase() {
-    if (verifyMaster()) {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allPeople, null, 2));
-        const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `ledger_backup.json`); dl.click();
-    }
+  function editEntry(id) {
+    const e = (allPeople[currentPersonId].transactions || []).find(t => t.id === id);
+    if (!e) return;
+    document.getElementById('tType').value = e.type; document.getElementById('tAmount').value = e.amount; document.getElementById('tDate').value = e.date; document.getElementById('tComment').value = e.comment || ''; document.getElementById('tRate').value = e.rate || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update Entry";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function generatePDF() {
-    const { jsPDF } = window.jspdf; const doc = new jsPDF();
-    doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20);
-    const rows = []; document.querySelectorAll("#historyBody tr").forEach(tr => { const cols = tr.querySelectorAll("td"); rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]); });
-    doc.autoTable({ head: [['Date', 'Type', 'Amount', 'Balance', 'Notes']], body: rows, startY: 25 });
-    doc.save('statement.pdf');
-  }
-
-  function exportToCSV() {
-    let csv = "Date,Type,Amount,Notes\n";
-    (allPeople[currentPersonId].transactions || []).forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`);
-    const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click();
-  }
-
-  function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
-  function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
-  function editEntry(id) { const e = allPeople[currentPersonId].transactions.find(t => t.id === id); document.getElementById('tType').value = e.type; document.getElementById('tAmount').value = e.amount; document.getElementById('tDate').value = e.date; document.getElementById('tComment').value = e.comment || ''; document.getElementById('tRate').value = e.rate || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update Entry"; }
+  function deleteEntry(id) { if(confirm("Permanently delete this entry?")) { db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); } }
   function updateSettings() { db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value)); }
-  function updatePie(s, i, r) {
-    const ctx = document.getElementById('loanPieChart').getContext('2d');
-    if (myPieChart) myPieChart.destroy();
-    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
-  }
+  function backupDatabase() { if (verifyMaster()) { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allPeople, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Master_Backup.json`); dl.click(); } }
+  function restoreFullDatabase(event) { const file = event.target.files[0]; if (!file) return; if (verifyMaster()) { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (confirm("Restore entire database?")) { db.ref('ledger').set(data); alert("Restored."); } } catch (err) { alert("Invalid file."); } }; reader.readAsText(file); } }
+  function handleCSVTransactionImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const lines = e.target.result.split('\n'); const imported = []; for (let i = 0; i < lines.length; i++) { const cols = lines[i].split(','); if (cols.length < 3 || isNaN(Date.parse(cols[0].trim()))) continue; imported.push({ id: 'T' + Date.now() + i, date: cols[0].trim(), type: cols[1].trim().toLowerCase().includes('received') ? 'received' : 'lent', amount: parseFloat(cols[2]) || 0, comment: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : '', rate: cols[4] ? parseFloat(cols[4]) : null }); } if (imported.length > 0) { let person = allPeople[currentPersonId]; person.transactions = (person.transactions || []).concat(imported); db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions); alert("Imported."); } }; reader.readAsText(file); }
+  function updateMasterPassword() { const oldP = document.getElementById('oldMasterPass').value.trim(), newP = document.getElementById('newMasterPass').value.trim(); if (masterHash && sha256(oldP) !== masterHash) return alert("Current Master Pass incorrect."); db.ref('masterHash').set(newP ? sha256(newP) : ""); alert("Updated."); }
+  function addNewPerson() { const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim(); if(name && verifyMaster()) { db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); } }
+  function confirmDeleteMember() { const id = document.getElementById('memberSelect').value; if(id && verifyMaster()) { if(confirm(`Delete ${allPeople[id].name}?`)) { db.ref(`ledger/${id}`).remove(); showIntroduction(); } } }
+  function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
+  function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
+  function updatePie(s, i, r) { const ctx = document.getElementById('loanPieChart').getContext('2d'); if (myPieChart) myPieChart.destroy(); myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}}); }
+  function generatePDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20); const rows = []; document.querySelectorAll("#historyBody tr").forEach(tr => { const cols = tr.querySelectorAll("td"); if(cols.length>4) rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]); }); doc.autoTable({ head: [['Date', 'Type', 'Amount', 'Balance', 'Notes']], body: rows, startY: 25 }); doc.save('ledger.pdf'); }
+  function exportToCSV() { let csv = "Date,Type,Amount,Notes\n"; (allPeople[currentPersonId].transactions || []).forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click(); }
 
   init();
 </script>
