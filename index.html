@@ -135,12 +135,16 @@
         <!-- REFACTORED MEMBER SECURITY -->
         <div class="section" style="background: #fdf2f5; border: 1px solid #ffdce0;">
           <h3>Member Security</h3>
-          <p style="font-size: 0.7em; color: #777; margin-bottom: 10px;">You can set, change, or clear the member's password. The Master Key works as confirmation.</p>
+          <p style="font-size: 0.7em; color: #777; margin-bottom: 10px;">Manage member identity and access. Master Key works as universal verification.</p>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: end;">
+            <div><label style="font-size: 0.7em;">New Member Name</label><input type="text" id="memberRenameInput" style="margin-bottom:0" placeholder="New Name"></div>
+            <button onclick="changeMemberName()" class="btn-primary" style="background: var(--primary);">Update Name</button>
+            
             <div><label style="font-size: 0.7em;">New Member Password</label><input type="password" id="memberPassNew" style="margin-bottom:0" placeholder="New Password"></div>
-            <div><label style="font-size: 0.7em;">Confirm with Current/Master Pass</label><input type="password" id="memberPassVerify" style="margin-bottom:0" placeholder="Verification"></div>
             <button onclick="changeMemberPassword()" class="btn-primary" style="background: var(--info);">Update Password</button>
-            <button onclick="removeMemberPassword()" class="btn-danger">Remove Lock (Public)</button>
+            
+            <div style="grid-column: span 1;"><label style="font-size: 0.7em;">Confirm with Current/Master Pass</label><input type="password" id="memberPassVerify" style="margin-bottom:0" placeholder="Verification Required"></div>
+            <button onclick="removeMemberPassword()" class="btn-danger">Remove Pass Lock</button>
           </div>
         </div>
 
@@ -256,7 +260,6 @@
   function handleMemberChange(id) { if(!id) return showIntroduction(); currentPersonId = id; checkAuthAndRender(); }
   function showIntroduction() { currentPersonId = null; document.getElementById('introView').style.display = 'flex'; document.getElementById('authOverlay').style.display = 'none'; document.getElementById('protectedArea').style.display = 'none'; document.getElementById('memberSelect').value = ""; }
   
-  // HIDDEN MASTER BYPASS LOGIC
   function unlockMember() {
     const typed = document.getElementById('sessionPassInput').value.trim();
     const hashed = sha256(typed);
@@ -289,7 +292,6 @@
     const person = allPeople[currentPersonId];
     document.getElementById('globalRate').value = person.globalRate || 0;
     
-    // Self-Healing Ids
     let transactions = (person.transactions || []).map(t => {
         if (!t.id) { t.id = 'T' + Date.now() + Math.floor(Math.random() * 1000); }
         return t;
@@ -355,35 +357,55 @@
     });
   }
 
-  // --- ACTIONS ---
-  function changeMemberPassword() {
-    const newP = document.getElementById('memberPassNew').value.trim();
+  // --- MEMBER MANAGEMENT ACTIONS ---
+  
+  function changeMemberName() {
+    const newName = document.getElementById('memberRenameInput').value.trim();
     const verifyP = document.getElementById('memberPassVerify').value.trim();
+    if (!newName) return alert("Enter new name.");
+    if (!verifyP) return alert("Verification required.");
+
     const hashedVerify = sha256(verifyP);
     const personPass = allPeople[currentPersonId].password;
 
-    if (!verifyP) return alert("Verification password required.");
+    if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
+        db.ref(`ledger/${currentPersonId}/name`).set(newName);
+        alert("Member renamed successfully.");
+        document.getElementById('memberRenameInput').value = "";
+        document.getElementById('memberPassVerify').value = "";
+    } else {
+        alert("Verification failed.");
+    }
+  }
+
+  function changeMemberPassword() {
+    const newP = document.getElementById('memberPassNew').value.trim();
+    const verifyP = document.getElementById('memberPassVerify').value.trim();
+    if (!verifyP) return alert("Verification required.");
     
+    const hashedVerify = sha256(verifyP);
+    const personPass = allPeople[currentPersonId].password;
+
     if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
         db.ref(`ledger/${currentPersonId}/password`).set(newP ? sha256(newP) : "");
-        alert("Member password updated successfully.");
+        alert("Password updated.");
         document.getElementById('memberPassNew').value = "";
         document.getElementById('memberPassVerify').value = "";
     } else {
-        alert("Verification failed. Incorrect member or master password.");
+        alert("Verification failed.");
     }
   }
 
   function removeMemberPassword() {
     const verifyP = document.getElementById('memberPassVerify').value.trim();
+    if (!verifyP) return alert("Verification required.");
+
     const hashedVerify = sha256(verifyP);
     const personPass = allPeople[currentPersonId].password;
 
-    if (!verifyP) return alert("Verification required to remove lock.");
-
     if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
         db.ref(`ledger/${currentPersonId}/password`).set("");
-        alert("Password lock removed.");
+        alert("Lock removed.");
         document.getElementById('memberPassVerify').value = "";
     } else {
         alert("Verification failed.");
@@ -391,15 +413,14 @@
   }
 
   function clearAllHistory() {
-    const pass = prompt("WARNING: This will delete ALL transactions for this member. Type Master Password to confirm:");
+    const pass = prompt("DANGER: Type Master Password to delete all transactions for this member:");
     if (pass && masterHash && sha256(pass) === masterHash) {
         db.ref(`ledger/${currentPersonId}/transactions`).set([]);
-        alert("History cleared. Outstanding reset to ₹0.");
-    } else if (pass) {
-        alert("Invalid Master Password.");
-    }
+        alert("All history cleared.");
+    } else if (pass) { alert("Invalid Master Password."); }
   }
 
+  // --- GENERAL ACTIONS ---
   function handleTransaction() {
     const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, rate = document.getElementById('tRate').value, editId = document.getElementById('editIdx').value;
     if (!amount || !date) return alert("Missing data");
@@ -418,21 +439,8 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function deleteEntry(id) { if(confirm("Permanently delete this entry?")) { db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); } }
+  function deleteEntry(id) { if(confirm("Delete entry?")) { db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); } }
   function updateSettings() { db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value)); }
   function backupDatabase() { if (verifyMaster()) { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allPeople, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Master_Backup.json`); dl.click(); } }
-  function restoreFullDatabase(event) { const file = event.target.files[0]; if (!file) return; if (verifyMaster()) { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (confirm("Restore entire database?")) { db.ref('ledger').set(data); alert("Restored."); } } catch (err) { alert("Invalid file."); } }; reader.readAsText(file); } }
-  function handleCSVTransactionImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const lines = e.target.result.split('\n'); const imported = []; for (let i = 0; i < lines.length; i++) { const cols = lines[i].split(','); if (cols.length < 3 || isNaN(Date.parse(cols[0].trim()))) continue; imported.push({ id: 'T' + Date.now() + i, date: cols[0].trim(), type: cols[1].trim().toLowerCase().includes('received') ? 'received' : 'lent', amount: parseFloat(cols[2]) || 0, comment: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : '', rate: cols[4] ? parseFloat(cols[4]) : null }); } if (imported.length > 0) { let person = allPeople[currentPersonId]; person.transactions = (person.transactions || []).concat(imported); db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions); alert("Imported."); } }; reader.readAsText(file); }
-  function updateMasterPassword() { const oldP = document.getElementById('oldMasterPass').value.trim(), newP = document.getElementById('newMasterPass').value.trim(); if (masterHash && sha256(oldP) !== masterHash) return alert("Current Master Pass incorrect."); db.ref('masterHash').set(newP ? sha256(newP) : ""); alert("Updated."); }
-  function addNewPerson() { const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim(); if(name && verifyMaster()) { db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); } }
-  function confirmDeleteMember() { const id = document.getElementById('memberSelect').value; if(id && verifyMaster()) { if(confirm(`Delete ${allPeople[id].name}?`)) { db.ref(`ledger/${id}`).remove(); showIntroduction(); } } }
-  function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
-  function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
-  function updatePie(s, i, r) { const ctx = document.getElementById('loanPieChart').getContext('2d'); if (myPieChart) myPieChart.destroy(); myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}}); }
-  function generatePDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20); const rows = []; document.querySelectorAll("#historyBody tr").forEach(tr => { const cols = tr.querySelectorAll("td"); if(cols.length>4) rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]); }); doc.autoTable({ head: [['Date', 'Type', 'Amount', 'Balance', 'Notes']], body: rows, startY: 25 }); doc.save('ledger.pdf'); }
-  function exportToCSV() { let csv = "Date,Type,Amount,Notes\n"; (allPeople[currentPersonId].transactions || []).forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click(); }
-
-  init();
-</script>
-</body>
-</html>
+  function restoreFullDatabase(event) { const file = event.target.files[0]; if (!file) return; if (verifyMaster()) { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (confirm("Restore database?")) { db.ref('ledger').set(data); alert("Restored."); } } catch (err) { alert("Invalid file."); } }; reader.readAsText(file); } }
+  function handleCSVTransactionImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const lines = e.target.result.split('\n'); const imported = []; for (let i = 0; i < lines.length; i++) { const cols = lines[i].split(','); if (cols.length < 3 || isNaN(Date.parse(cols[0].trim()))) continue; imported.push({ id: 'T' + Date.now() + i, date: cols[0].trim(), type: cols[1].trim().toLowerCase().includes('received') ? 'received' : 'lent', amount: parseFloat(cols[2]) || 0, comment: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : '', rate: cols[4] ? parseFloat(cols[4]
