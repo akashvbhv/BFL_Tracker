@@ -25,51 +25,32 @@
     body { 
       background: linear-gradient(rgba(102, 126, 234, 0.7), rgba(118, 75, 162, 0.7)), 
                   url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=2000');
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
+      background-size: cover; background-attachment: fixed; background-position: center;
       min-height: 100vh; padding: 20px; color: var(--dark); 
     }
 
-    /* Animated Header */
     .title-banner { 
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      margin: 0 auto 25px auto; padding: 30px; 
-      border-radius: 25px; text-align: center; 
-      box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3);
-      max-width: 1300px;
+      background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3); margin: 0 auto 25px auto; padding: 30px; 
+      border-radius: 25px; text-align: center; box-shadow: 0 8px 32px 0 rgba(0,0,0,0.3); max-width: 1300px;
     }
     .title-banner h1 { 
-      font-family: 'Dancing Script', cursive; 
-      font-size: 3.8em; font-weight: 700; color: white;
-      text-shadow: 2px 4px 8px rgba(0,0,0,0.3);
-      animation: fadeInDown 1s ease;
+      font-family: 'Dancing Script', cursive; font-size: 3.8em; font-weight: 700; color: white;
+      text-shadow: 2px 4px 8px rgba(0,0,0,0.3); animation: fadeInDown 1s ease;
     }
 
     .container { max-width: 1300px; margin: 0 auto; display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
     
-    /* Animations */
     @keyframes fadeInDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
     .view-transition { animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     
-    button:active { transform: scale(0.96); }
-
-    .sidebar-section { 
-      background: var(--glass); border-radius: 20px; padding: 20px; 
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px;
-    }
+    .sidebar-section { background: var(--glass); border-radius: 20px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-bottom: 20px; }
     .sidebar h2 { font-size: 0.85em; margin-bottom: 12px; color: var(--secondary); text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
 
-    /* Dropdown Styles */
-    #memberSelect {
-      width: 100%; padding: 14px; border-radius: 12px;
-      border: 2px solid var(--primary); background: white;
-      font-weight: 600; color: var(--secondary); cursor: pointer; outline: none;
-    }
+    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #eef2f6; border-radius: 10px; outline: none; margin-bottom: 10px; font-size: 0.9em; }
+    button { cursor: pointer; border: none; font-weight: 600; transition: 0.2s; border-radius: 10px; padding: 12px; }
+    button:active { transform: scale(0.96); }
 
     .section { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-bottom: 20px; }
     .section h3 { margin-bottom: 15px; font-size: 1.2em; color: var(--secondary); border-left: 5px solid var(--primary); padding-left: 12px; }
@@ -78,24 +59,19 @@
     .card { background: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 4px solid #eee; }
     .card .val { font-size: 1.6em; font-weight: 700; margin: 5px 0; }
 
-    /* Filter Bar */
-    .filter-bar { 
-        background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; 
-        display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid #eef2f6; 
-    }
-    .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.85em; }
-    .filter-bar input, .filter-bar select { padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9em; }
+    .filter-bar { background: #f8fafc; padding: 15px; border-radius: 12px; margin-bottom: 15px; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; border: 1px solid #eef2f6; }
+    .filter-group { display: flex; align-items: center; gap: 8px; font-size: 0.8em; }
+    .filter-bar input, .filter-bar select { margin-bottom: 0; padding: 8px; width: auto; }
 
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; font-size: 0.85em; }
-    th { background: #f8fafc; cursor: pointer; color: #7f8c8d; text-transform: uppercase; }
+    th { background: #f8fafc; color: #7f8c8d; cursor: pointer; }
     .type-emi { background: #fdfaff; font-weight: 600; color: var(--secondary); }
-    
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    input, select, textarea { width: 100%; padding: 12px; border: 2px solid #eef2f6; border-radius: 10px; outline: none; }
-    
-    .btn-main { background: var(--primary); color: white; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; }
-    .btn-backup { background: var(--dark); color: white; width: 100%; padding: 10px; border-radius: 10px; margin-top: 10px; font-size: 0.8em; }
+
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-danger { background: var(--danger); color: white; width: 100%; }
+    .btn-dark { background: var(--dark); color: white; width: 100%; }
+    .btn-success { background: var(--success); color: white; width: 100%; }
 
     .guide-step { margin-bottom: 15px; padding: 10px 15px; border-left: 4px solid var(--info); background: #fcfdfe; border-radius: 0 10px 10px 0; }
     .guide-step h4 { color: var(--secondary); margin-bottom: 4px; font-size: 0.95em; }
@@ -111,40 +87,42 @@
 <div class="container">
   <div class="sidebar">
     <div class="sidebar-section view-transition">
-      <button class="btn-main" onclick="showIntroduction()" style="width:100%; margin-bottom:15px; background: var(--info);">📖 Quick Guide</button>
+      <button class="btn-primary" onclick="showIntroduction()" style="margin-bottom:15px; background: var(--info);">📖 Quick Guide</button>
       
       <h2>Active Members</h2>
       <select id="memberSelect" onchange="handleMemberChange(this.value)">
           <option value="">-- Select Member --</option>
       </select>
       
-      <button onclick="backupDatabase()" class="btn-backup">💾 Backup All Data (JSON)</button>
+      <button onclick="confirmDeleteMember()" class="btn-danger" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">🗑️ Delete Selected Member</button>
+      <button onclick="backupDatabase()" class="btn-dark" style="margin-top: 10px; padding: 8px; font-size: 0.8em;">💾 Backup All Data</button>
     </div>
     
     <div class="sidebar-section view-transition">
-      <h2>Create Profile</h2>
-      <input type="text" id="newPersonName" placeholder="Name" style="margin-bottom:8px;">
-      <input type="password" id="newPersonPass" placeholder="Password" style="margin-bottom:8px;">
-      <button class="btn-main" onclick="addNewPerson()" style="width:100%; background: var(--success);">Create Profile +</button>
+      <h2>Create New Profile</h2>
+      <input type="text" id="newPersonName" placeholder="Member Name">
+      <input type="password" id="newPersonPass" placeholder="Set Password (Optional)">
+      <button class="btn-success" onclick="addNewPerson()">Create Profile +</button>
     </div>
 
     <div class="sidebar-section view-transition" style="border-top: 4px solid var(--danger);">
-      <h2>Master Key</h2>
-      <input type="password" id="masterPassUpdate" placeholder="New Master Key" style="margin-bottom:8px;">
-      <button onclick="updateMasterPassword()" class="btn-backup">Update Master Key</button>
+      <h2>System Master Key</h2>
+      <p style="font-size: 0.7em; color: #666; margin-bottom: 10px;">Needed for admin tasks.</p>
+      <input type="password" id="oldMasterPass" placeholder="Current Master Key">
+      <input type="password" id="newMasterPass" placeholder="New Master Key">
+      <button onclick="updateMasterPassword()" class="btn-dark">Update Master Key</button>
     </div>
   </div>
 
   <div class="main-content">
     
-    <!-- Quick Guide View -->
     <div id="introView" class="section view-transition">
         <h3>System Logic Quick Guide</h3>
         <p style="margin-bottom: 15px; color: #666; font-size: 0.9em;">Accurate tracking using <b>Bajaj Finserv Overdraft</b> methodology.</p>
         
         <div class="guide-step">
             <h4>1. User Provisioning</h4>
-            <p>Add profiles via sidebar. Creation or deletion requires the <b>Master Password</b>. If Master is unset, actions are unrestricted.</p>
+            <p>Add/Delete profiles via sidebar. These actions require the <b>Master Password</b>. If no Master key is set, anyone can manage profiles.</p>
         </div>
         <div class="guide-step">
             <h4>2. Interest Calculation Logic</h4>
@@ -152,28 +130,26 @@
         </div>
         <div class="guide-step">
             <h4>3. Monthly Capitalization</h4>
-            <p>On the <b>1st of every month</b>, accumulated daily interest is converted into an "Accrued Interest" entry and added to the principal.</p>
+            <p>On the <b>1st of every month</b>, accumulated daily interest is converted into an "Accrued Interest" entry and added to the principal balance.</p>
         </div>
         <div class="guide-step">
             <h4>4. Custom Interest Logic (Per Entry)</h4>
-            <p>Define a <b>Global Rate</b> in settings. Override this for specific periods by entering a <b>Specific Rate</b> in a transaction; it applies until changed.</p>
+            <p>Define a <b>Global Rate</b> in settings. Override this for specific periods by entering a <b>Specific Rate</b> in a transaction.</p>
         </div>
         <div class="guide-step">
             <h4>5. Corrections & Auditing</h4>
-            <p>Editing or deleting past entries triggers an automatic full timeline recalculation to update current balance instantly.</p>
+            <p>All manual entries are <b>deletable</b>. Deleting an entry triggers a full recalculation of the history to ensure balance integrity.</p>
         </div>
     </div>
 
-    <!-- Auth View -->
     <div id="authOverlay" class="section view-transition" style="text-align:center; display:none;">
         <div style="font-size: 4em; margin-bottom: 10px;">🔒</div>
         <h2 id="authMemberName">Select a Member</h2>
-        <input type="password" id="sessionPassInput" placeholder="Password" style="max-width:300px; text-align:center; margin-bottom:15px;">
+        <input type="password" id="sessionPassInput" placeholder="Enter Password" style="max-width:300px; text-align:center;">
         <br>
-        <button onclick="unlockMember()" class="btn-main" style="padding: 12px 40px; background: var(--secondary);">Unlock Ledger</button>
+        <button onclick="unlockMember()" class="btn-primary" style="padding: 12px 40px; width: auto; background: var(--secondary);">Unlock Ledger</button>
     </div>
 
-    <!-- Ledger View -->
     <div id="protectedArea" class="view-transition" style="display:none; flex-direction:column; gap:20px;">
         <div class="section" style="text-align: center;">
             <h2 id="heroTitle" style="font-family: 'Playball', cursive; font-size: 2.5em; color: var(--secondary);">...</h2>
@@ -187,19 +163,31 @@
           <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.75em; color: #777;">INTEREST</div></div>
         </div>
 
+        <!-- NEW: Member Security Section -->
+        <div class="section" style="background: #fdf2f5; border: 1px solid #ffdce0;">
+          <h3>Member Security</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; align-items: end;">
+            <div><label style="font-size: 0.8em;">Update Password</label><input type="password" id="memberPassUpdate" style="margin-bottom:0"></div>
+            <button onclick="changeMemberPassword()" class="btn-primary" style="background: var(--info);">Save Password</button>
+            <button onclick="removeMemberPassword()" class="btn-danger">Remove Lock (Public)</button>
+          </div>
+        </div>
+
         <div class="section">
-          <h3>Transaction & Interest</h3>
-          <div class="form-grid">
-            <div><label style="font-size:0.8em">Global Rate %</label><input type="number" id="globalRate" step="0.01"></div>
-            <button onclick="updateSettings()" class="btn-main" style="align-self:end; background: var(--secondary);">Update Global Rate</button>
-            <div style="grid-column: span 2; height: 1px; background: #eee; margin: 5px 0;"></div>
+          <h3>Transaction & Rates</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div><label style="font-size:0.8em">Global Annual Rate %</label><input type="number" id="globalRate" step="0.01"></div>
+            <button onclick="updateSettings()" class="btn-dark" style="align-self:end; margin-bottom: 10px;">Update Global Rate</button>
+          </div>
+          <hr style="margin: 15px 0; opacity: 0.1;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
             <div><label style="font-size:0.8em">Type</label><select id="tType"><option value="lent">➕ Lent Money</option><option value="received">➖ Received Money</option></select></div>
             <div><label style="font-size:0.8em">Amount (₹)</label><input type="number" id="tAmount" placeholder="0.00"></div>
             <div><label style="font-size:0.8em">Date</label><input type="date" id="tDate"></div>
-            <div><label style="font-size:0.8em">Specific Rate % (Optional)</label><input type="number" id="tRate" step="0.01"></div>
-            <div style="grid-column: span 2;"><label style="font-size:0.8em">Notes</label><textarea id="tComment" rows="1"></textarea></div>
+            <div><label style="font-size:0.8em">Specific Rate % (Optional)</label><input type="number" id="tRate" step="0.01" placeholder="Global if blank"></div>
+            <div style="grid-column: span 2;"><label style="font-size:0.8em">Notes</label><textarea id="tComment" rows="1" style="margin-bottom:0"></textarea></div>
             <input type="hidden" id="editIdx" value="-1">
-            <button onclick="handleTransaction()" id="submitBtn" class="btn-main" style="grid-column: span 2;">Save Entry</button>
+            <button onclick="handleTransaction()" id="submitBtn" class="btn-primary" style="grid-column: span 2;">Save Entry</button>
           </div>
         </div>
 
@@ -207,13 +195,13 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h3>History</h3>
             <div style="display:flex; gap:8px;">
-                <button onclick="generatePDF()" style="background:#e74c3c; color:white; padding:6px 12px; border-radius:8px; font-size:0.75em; border:none;">PDF</button>
-                <button onclick="exportToCSV()" style="background:#34495e; color:white; padding:6px 12px; border-radius:8px; font-size:0.75em; border:none;">CSV</button>
+                <button onclick="generatePDF()" style="background:#e74c3c; color:white; padding:6px 12px; font-size:0.75em;">PDF</button>
+                <button onclick="exportToCSV()" style="background:#34495e; color:white; padding:6px 12px; font-size:0.75em;">CSV</button>
             </div>
           </div>
 
           <div class="filter-bar">
-            <div class="filter-group"><span>🔍</span><input type="text" id="filterSearch" placeholder="Search notes..." onkeyup="updateUI()"></div>
+            <div class="filter-group"><span>🔍</span><input type="text" id="filterSearch" placeholder="Search..." onkeyup="updateUI()"></div>
             <div class="filter-group"><span>From:</span><input type="date" id="filterStart" onchange="updateUI()"></div>
             <div class="filter-group"><span>To:</span><input type="date" id="filterEnd" onchange="updateUI()"></div>
             <div class="filter-group"><span>Type:</span><select id="filterType" onchange="updateUI()"><option value="all">All</option><option value="lent">Sent</option><option value="received">Recv</option><option value="interest_emi">Interest</option></select></div>
@@ -316,7 +304,7 @@
 
   function verifyMaster() {
     if(!masterHash) return true;
-    const p = prompt("Master Key Required:");
+    const p = prompt("Master Password Required:");
     return p && sha256(p.trim()) === masterHash;
   }
 
@@ -327,7 +315,7 @@
       unlockedSessions[currentPersonId] = true;
       document.getElementById('sessionPassInput').value = "";
       checkAuthAndRender(); renderDropdown();
-    } else alert("Denied");
+    } else alert("Invalid Password");
   }
 
   function checkAuthAndRender() {
@@ -392,8 +380,7 @@
 
     let filtered = timeline.filter(t => {
         const matchesDate = (!sDate || t.date >= sDate) && (!eDate || t.date <= eDate);
-        return (t.comment || '').toLowerCase().includes(search) && 
-               (typeFilt === 'all' || t.type === typeFilt) && matchesDate;
+        return (t.comment || '').toLowerCase().includes(search) && (typeFilt === 'all' || t.type === typeFilt) && matchesDate;
     });
 
     filtered.sort((a,b) => {
@@ -407,10 +394,62 @@
     filtered.forEach(t => {
       const row = tbody.insertRow(); if(t.type === 'interest_emi') row.className = 'type-emi';
       const rateLabel = t.rate ? `<span style="font-size:0.7em; color:var(--primary)">@${t.rate}%</span>` : '';
-      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'} ${rateLabel}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button onclick="editEntry(\''+t.id+'\')" style="border:none; background:none; cursor:pointer;">✏️</button> <button onclick="deleteEntry(\''+t.id+'\')" style="border:none; background:none; cursor:pointer; color:red;">🗑️</button>':'-'}</td>`;
+      row.innerHTML = `<td>${t.date}</td><td>${t.type==='lent'?'➕ Sent':t.type==='received'?'➖ Recv':'💰 Interest'} ${rateLabel}</td><td>₹${Math.round(t.amount).toLocaleString()}</td><td>₹${Math.round(t.balance).toLocaleString()}</td><td>${t.comment||'-'}</td><td>${t.type!=='interest_emi'?'<button onclick="editEntry(\''+t.id+'\')" style="background:none; color:blue; padding:2px;">✏️</button> <button onclick="deleteEntry(\''+t.id+'\')" style="background:none; color:red; padding:2px;">🗑️</button>':'-'}</td>`;
     });
   }
 
+  // --- MODIFICATION 1: Master Password with check ---
+  function updateMasterPassword() {
+    const oldP = document.getElementById('oldMasterPass').value.trim();
+    const newP = document.getElementById('newMasterPass').value.trim();
+    
+    if (masterHash && sha256(oldP) !== masterHash) return alert("Current Master Password incorrect.");
+    
+    db.ref('masterHash').set(newP ? sha256(newP) : "");
+    alert("Master Password Updated.");
+    document.getElementById('oldMasterPass').value = ""; document.getElementById('newMasterPass').value = "";
+  }
+
+  // --- MODIFICATION 2: Profile Management ---
+  function addNewPerson() {
+    const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim();
+    if(name && verifyMaster()) { 
+        db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); 
+        document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = '';
+    }
+  }
+
+  function confirmDeleteMember() {
+    const id = document.getElementById('memberSelect').value;
+    if(!id) return alert("Select a member first");
+    if(verifyMaster()) {
+        if(confirm(`Permanently delete ${allPeople[id].name}?`)) { db.ref(`ledger/${id}`).remove(); showIntroduction(); }
+    }
+  }
+
+  // --- MODIFICATION 3: Member Password Changes ---
+  function changeMemberPassword() {
+    const np = document.getElementById('memberPassUpdate').value.trim();
+    if(!np) return alert("Enter a new password");
+    db.ref(`ledger/${currentPersonId}/password`).set(sha256(np));
+    alert("Member password updated!"); document.getElementById('memberPassUpdate').value = "";
+  }
+
+  function removeMemberPassword() {
+    if(confirm("Remove password? This ledger will be open to everyone.")) {
+        db.ref(`ledger/${currentPersonId}/password`).set("");
+        alert("Password removed.");
+    }
+  }
+
+  // --- MODIFICATION 5: All Entries Deletable ---
+  function deleteEntry(id) {
+    if(confirm("Permanently delete this entry? Balance will be recalculated.")) {
+        db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id));
+    }
+  }
+
+  // --- HELPERS ---
   function handleTransaction() {
     const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, rate = document.getElementById('tRate').value, editId = document.getElementById('editIdx').value;
     if (!amount || !date) return alert("Missing data");
@@ -429,22 +468,6 @@
     }
   }
 
-  function updateMasterPassword() {
-    const np = document.getElementById('masterPassUpdate').value.trim();
-    if(verifyMaster()) { db.ref('masterHash').set(np ? sha256(np) : ""); alert("Updated"); document.getElementById('masterPassUpdate').value = ""; }
-  }
-
-  function addNewPerson() {
-    const name = document.getElementById('newPersonName').value.trim(), pass = document.getElementById('newPersonPass').value.trim();
-    if(name && verifyMaster()) { db.ref('ledger').push({ name, password: pass ? sha256(pass.trim()) : "", globalRate: 0, transactions: [] }); document.getElementById('newPersonName').value = ''; document.getElementById('newPersonPass').value = ''; }
-  }
-
-  function updatePie(s, i, r) {
-    const ctx = document.getElementById('loanPieChart').getContext('2d');
-    if (myPieChart) myPieChart.destroy();
-    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
-  }
-
   function generatePDF() {
     const { jsPDF } = window.jspdf; const doc = new jsPDF();
     doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20);
@@ -455,15 +478,19 @@
 
   function exportToCSV() {
     let csv = "Date,Type,Amount,Notes\n";
-    allPeople[currentPersonId].transactions.forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`);
+    (allPeople[currentPersonId].transactions || []).forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`);
     const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click();
   }
 
   function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
   function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
   function editEntry(id) { const e = allPeople[currentPersonId].transactions.find(t => t.id === id); document.getElementById('tType').value = e.type; document.getElementById('tAmount').value = e.amount; document.getElementById('tDate').value = e.date; document.getElementById('tComment').value = e.comment || ''; document.getElementById('tRate').value = e.rate || ''; document.getElementById('editIdx').value = id; document.getElementById('submitBtn').innerText = "Update Entry"; }
-  function deleteEntry(id) { if(confirm("Delete?")) db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); }
   function updateSettings() { db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value)); }
+  function updatePie(s, i, r) {
+    const ctx = document.getElementById('loanPieChart').getContext('2d');
+    if (myPieChart) myPieChart.destroy();
+    myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}});
+  }
 
   init();
 </script>
