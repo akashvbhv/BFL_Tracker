@@ -358,23 +358,32 @@
   }
 
   // --- MEMBER MANAGEMENT ACTIONS ---
-  
-  function changeMemberName() {
-    const newName = document.getElementById('memberRenameInput').value.trim();
-    const verifyP = document.getElementById('memberPassVerify').value.trim();
-    if (!newName) return alert("Enter new name.");
-    if (!verifyP) return alert("Verification required.");
+function addNewPerson() {
+    const nameInput = document.getElementById('newPersonName');
+    const passInput = document.getElementById('newPersonPass');
+    const name = nameInput.value.trim();
+    const pass = passInput.value.trim();
 
-    const hashedVerify = sha256(verifyP);
-    const personPass = allPeople[currentPersonId].password;
+    if (!name) {
+      alert("Please enter a member name.");
+      return;
+    }
 
-    if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
-        db.ref(`ledger/${currentPersonId}/name`).set(newName);
-        alert("Member renamed successfully.");
-        document.getElementById('memberRenameInput').value = "";
-        document.getElementById('memberPassVerify').value = "";
-    } else {
-        alert("Verification failed.");
+    // This calls the prompt if a master password exists
+    if (verifyMaster()) {
+      db.ref('ledger').push({
+        name: name,
+        password: pass ? sha256(pass.trim()) : "",
+        globalRate: 0,
+        transactions: []
+      }).then(() => {
+        // SUCCESS: Clear the inputs so the user knows it worked
+        alert("Member '" + name + "' added successfully!");
+        nameInput.value = '';
+        passInput.value = '';
+      }).catch((error) => {
+        alert("Firebase Error: " + error.message);
+      });
     }
   }
 
