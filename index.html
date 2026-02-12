@@ -359,8 +359,21 @@
 
   // --- MEMBER MANAGEMENT ACTIONS ---
 function addNewPerson() {
+    // 1. Ensure the Firebase database is initialized
+    if (typeof db === 'undefined') {
+        alert("System is still loading. Please wait a second and try again.");
+        return;
+    }
+
+    // 2. Get the inputs
     const nameInput = document.getElementById('newPersonName');
     const passInput = document.getElementById('newPersonPass');
+    
+    if (!nameInput || !passInput) {
+        console.error("UI Elements missing: Ensure IDs 'newPersonName' and 'newPersonPass' exist.");
+        return;
+    }
+
     const name = nameInput.value.trim();
     const pass = passInput.value.trim();
 
@@ -369,23 +382,29 @@ function addNewPerson() {
       return;
     }
 
-    // This calls the prompt if a master password exists
+    // 3. Verify Master (checks for masterHash and sha256 function)
+    if (typeof verifyMaster !== 'function') {
+        alert("Security module not loaded. Please refresh the page.");
+        return;
+    }
+
     if (verifyMaster()) {
+      // 4. Push to Firebase
       db.ref('ledger').push({
         name: name,
-        password: pass ? sha256(pass.trim()) : "",
+        password: (pass && typeof sha256 === 'function') ? sha256(pass.trim()) : "",
         globalRate: 0,
         transactions: []
       }).then(() => {
-        // SUCCESS: Clear the inputs so the user knows it worked
         alert("Member '" + name + "' added successfully!");
-        nameInput.value = '';
-        passInput.value = '';
+        nameInput.value = ''; // Clear input
+        passInput.value = ''; // Clear input
       }).catch((error) => {
-        alert("Firebase Error: " + error.message);
+        alert("Database Error: " + error.message);
       });
     }
   }
+  
 
   function changeMemberPassword() {
     const newP = document.getElementById('memberPassNew').value.trim();
