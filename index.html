@@ -132,7 +132,6 @@
           <div class="card" style="border-color: var(--warning);"><div class="val" id="statInterest" style="color: var(--warning);">₹0</div><div style="font-size: 0.75em; color: #777;">INTEREST</div></div>
         </div>
 
-        <!-- REFACTORED MEMBER SECURITY -->
         <div class="section" style="background: #fdf2f5; border: 1px solid #ffdce0;">
           <h3>Member Security</h3>
           <p style="font-size: 0.7em; color: #777; margin-bottom: 10px;">Manage member identity and access. Master Key works as universal verification.</p>
@@ -201,21 +200,11 @@
 </div>
 
 <script>
-  // --- CORE SYSTEM & FIREBASE ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
-    authDomain: "vaibhav-s-ledger.firebaseapp.com",
-    databaseURL: "https://vaibhav-s-ledger-default-rtdb.firebaseio.com",
-    projectId: "vaibhav-s-ledger",
-    storageBucket: "vaibhav-s-ledger.firebasestorage.app",
-    messagingSenderId: "199650798840",
-    appId: "1:199650798840:web:06ff1415dd60a603f39f0d"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  let currentPersonId = null, allPeople = {}, myPieChart = null, unlockedSessions = {}; 
-  let sortCol = 'date', sortDir = -1, masterHash = "";
+  // --- DECLARE GLOBAL VARIABLES TO PREVENT REFERENCE ERRORS ---
+  let db, allPeople = {}, myPieChart = null, unlockedSessions = {}; 
+  let currentPersonId = null, sortCol = 'date', sortDir = -1, masterHash = "";
 
+  // --- HASHING UTILITY (Global) ---
   function sha256(ascii) {
     function rightRotate(value, amount) { return (value >>> amount) | (value << (32 - amount)); }
     var mathPow = Math.pow, maxWord = mathPow(2, 32), result = '', words = [], asciiLength = ascii.length, hash = sha256.h = sha256.h || [], k = sha256.k = sha256.k || [], primeCounter = k.length;
@@ -236,9 +225,23 @@
     return result;
   }
 
+  // --- INITIALIZATION ---
   function init() {
+    const firebaseConfig = {
+      apiKey: "AIzaSyBkI0K87SReSf9QiCsxn1qwmxIFEgzNvd4",
+      authDomain: "vaibhav-s-ledger.firebaseapp.com",
+      databaseURL: "https://vaibhav-s-ledger-default-rtdb.firebaseio.com",
+      projectId: "vaibhav-s-ledger",
+      storageBucket: "vaibhav-s-ledger.firebasestorage.app",
+      messagingSenderId: "199650798840",
+      appId: "1:199650798840:web:06ff1415dd60a603f39f0d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+
     document.getElementById('tDate').valueAsDate = new Date();
-    db.ref('masterHash').on('value', snap => masterHash = snap.val() || "");
+    
+    db.ref('masterHash').on('value', snap => { masterHash = snap.val() || ""; });
     db.ref('ledger').on('value', snap => {
       allPeople = snap.val() || {};
       renderDropdown();
@@ -246,25 +249,54 @@
     });
   }
 
-  function renderDropdown() {
-    const sel = document.getElementById('memberSelect');
-    const cur = sel.value; sel.innerHTML = '<option value="">-- Select Member --</option>';
-    Object.keys(allPeople).forEach(id => {
-      const opt = document.createElement('option');
-      opt.value = id; opt.text = allPeople[id].name + (unlockedSessions[id] ? " 🔓" : " 🔒");
-      sel.appendChild(opt);
-    });
-    sel.value = cur;
+  // --- SECURITY HELPERS ---
+  function verifyMaster() {
+    if (!masterHash) return true;
+    const p = prompt("Master Password Required:");
+    return p && sha256(p.trim()) === masterHash;
   }
 
-  function handleMemberChange(id) { if(!id) return showIntroduction(); currentPersonId = id; checkAuthAndRender(); }
-  function showIntroduction() { currentPersonId = null; document.getElementById('introView').style.display = 'flex'; document.getElementById('authOverlay').style.display = 'none'; document.getElementById('protectedArea').style.display = 'none'; document.getElementById('memberSelect').value = ""; }
-  
+  // --- ACTIONS (WITH REFERENCE PROTECTION) ---
+  function addNewPerson() {
+    if (!db) return alert("System still loading...");
+    const nameInput = document.getElementById('newPersonName');
+    const passInput = document.getElementById('newPersonPass');
+    const name = nameInput.value.trim();
+    if (!name) return alert("Name required.");
+
+    if (verifyMaster()) {
+      db.ref('ledger').push({
+        name: name,
+        password: passInput.value ? sha256(passInput.value.trim()) : "",
+        globalRate: 0,
+        transactions: []
+      }).then(() => {
+        alert("Member added!");
+        nameInput.value = ''; passInput.value = '';
+      });
+    }
+  }
+
+  function handleMemberChange(id) { 
+    if(!id) return showIntroduction(); 
+    currentPersonId = id; 
+    checkAuthAndRender(); 
+  }
+
+  function showIntroduction() {
+    currentPersonId = null;
+    document.getElementById('introView').style.display = 'flex';
+    document.getElementById('authOverlay').style.display = 'none';
+    document.getElementById('protectedArea').style.display = 'none';
+    document.getElementById('memberSelect').value = "";
+  }
+
   function unlockMember() {
+    if (!allPeople[currentPersonId]) return;
     const typed = document.getElementById('sessionPassInput').value.trim();
     const hashed = sha256(typed);
     const personPass = allPeople[currentPersonId].password;
-    if(hashed === personPass || (masterHash && hashed === masterHash)) {
+    if (hashed === personPass || (masterHash && hashed === masterHash)) {
       unlockedSessions[currentPersonId] = true;
       document.getElementById('sessionPassInput').value = "";
       checkAuthAndRender(); renderDropdown();
@@ -290,10 +322,12 @@
 
   function updateUI() {
     const person = allPeople[currentPersonId];
+    if (!person) return;
     document.getElementById('globalRate').value = person.globalRate || 0;
     
+    // Ensure manual transactions have IDs
     let transactions = (person.transactions || []).map(t => {
-        if (!t.id) { t.id = 'T' + Date.now() + Math.floor(Math.random() * 1000); }
+        if (!t.id) t.id = 'T' + Date.now() + Math.floor(Math.random() * 1000);
         return t;
     });
 
@@ -357,98 +391,51 @@
     });
   }
 
-  // --- MEMBER MANAGEMENT ACTIONS ---
-function addNewPerson() {
-    // 1. Ensure the Firebase database is initialized
-    if (typeof db === 'undefined') {
-        alert("System is still loading. Please wait a second and try again.");
-        return;
-    }
-
-    // 2. Get the inputs
-    const nameInput = document.getElementById('newPersonName');
-    const passInput = document.getElementById('newPersonPass');
-    
-    if (!nameInput || !passInput) {
-        console.error("UI Elements missing: Ensure IDs 'newPersonName' and 'newPersonPass' exist.");
-        return;
-    }
-
-    const name = nameInput.value.trim();
-    const pass = passInput.value.trim();
-
-    if (!name) {
-      alert("Please enter a member name.");
-      return;
-    }
-
-    // 3. Verify Master (checks for masterHash and sha256 function)
-    if (typeof verifyMaster !== 'function') {
-        alert("Security module not loaded. Please refresh the page.");
-        return;
-    }
-
-    if (verifyMaster()) {
-      // 4. Push to Firebase
-      db.ref('ledger').push({
-        name: name,
-        password: (pass && typeof sha256 === 'function') ? sha256(pass.trim()) : "",
-        globalRate: 0,
-        transactions: []
-      }).then(() => {
-        alert("Member '" + name + "' added successfully!");
-        nameInput.value = ''; // Clear input
-        passInput.value = ''; // Clear input
-      }).catch((error) => {
-        alert("Database Error: " + error.message);
-      });
-    }
+  function changeMemberName() {
+    const newName = document.getElementById('memberRenameInput').value.trim();
+    const verifyP = document.getElementById('memberPassVerify').value.trim();
+    if (!newName || !verifyP) return alert("All fields required.");
+    const hashedVerify = sha256(verifyP);
+    const personPass = allPeople[currentPersonId].password;
+    if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
+        db.ref(`ledger/${currentPersonId}/name`).set(newName);
+        alert("Renamed!");
+        document.getElementById('memberRenameInput').value = ""; document.getElementById('memberPassVerify').value = "";
+    } else alert("Verification failed.");
   }
-  
 
   function changeMemberPassword() {
     const newP = document.getElementById('memberPassNew').value.trim();
     const verifyP = document.getElementById('memberPassVerify').value.trim();
     if (!verifyP) return alert("Verification required.");
-    
     const hashedVerify = sha256(verifyP);
     const personPass = allPeople[currentPersonId].password;
-
     if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
         db.ref(`ledger/${currentPersonId}/password`).set(newP ? sha256(newP) : "");
         alert("Password updated.");
-        document.getElementById('memberPassNew').value = "";
-        document.getElementById('memberPassVerify').value = "";
-    } else {
-        alert("Verification failed.");
-    }
+        document.getElementById('memberPassNew').value = ""; document.getElementById('memberPassVerify').value = "";
+    } else alert("Verification failed.");
   }
 
   function removeMemberPassword() {
     const verifyP = document.getElementById('memberPassVerify').value.trim();
     if (!verifyP) return alert("Verification required.");
-
     const hashedVerify = sha256(verifyP);
     const personPass = allPeople[currentPersonId].password;
-
     if (hashedVerify === personPass || (masterHash && hashedVerify === masterHash)) {
         db.ref(`ledger/${currentPersonId}/password`).set("");
-        alert("Lock removed.");
-        document.getElementById('memberPassVerify').value = "";
-    } else {
-        alert("Verification failed.");
-    }
+        alert("Removed."); document.getElementById('memberPassVerify').value = "";
+    } else alert("Verification failed.");
   }
 
   function clearAllHistory() {
-    const pass = prompt("DANGER: Type Master Password to delete all transactions for this member:");
+    const pass = prompt("DANGER: Type Master Pass to wipe history:");
     if (pass && masterHash && sha256(pass) === masterHash) {
         db.ref(`ledger/${currentPersonId}/transactions`).set([]);
-        alert("All history cleared.");
-    } else if (pass) { alert("Invalid Master Password."); }
+        alert("Cleared.");
+    } else alert("Invalid.");
   }
 
-  // --- GENERAL ACTIONS ---
   function handleTransaction() {
     const amount = parseFloat(document.getElementById('tAmount').value), date = document.getElementById('tDate').value, comment = document.getElementById('tComment').value, type = document.getElementById('tType').value, rate = document.getElementById('tRate').value, editId = document.getElementById('editIdx').value;
     if (!amount || !date) return alert("Missing data");
@@ -467,8 +454,21 @@ function addNewPerson() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function deleteEntry(id) { if(confirm("Delete entry?")) { db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); } }
+  function deleteEntry(id) { if(confirm("Delete?")) { db.ref(`ledger/${currentPersonId}/transactions`).set(allPeople[currentPersonId].transactions.filter(t => t.id !== id)); } }
   function updateSettings() { db.ref(`ledger/${currentPersonId}/globalRate`).set(parseFloat(document.getElementById('globalRate').value)); }
+  function renderDropdown() { const sel = document.getElementById('memberSelect'); if(!sel) return; const cur = sel.value; sel.innerHTML = '<option value="">-- Select Member --</option>'; Object.keys(allPeople).forEach(id => { const opt = document.createElement('option'); opt.value = id; opt.text = allPeople[id].name + (unlockedSessions[id] ? " 🔓" : " 🔒"); sel.appendChild(opt); }); sel.value = cur; }
   function backupDatabase() { if (verifyMaster()) { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allPeople, null, 2)); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", `Master_Backup.json`); dl.click(); } }
-  function restoreFullDatabase(event) { const file = event.target.files[0]; if (!file) return; if (verifyMaster()) { const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); if (confirm("Restore database?")) { db.ref('ledger').set(data); alert("Restored."); } } catch (err) { alert("Invalid file."); } }; reader.readAsText(file); } }
-  function handleCSVTransactionImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const lines = e.target.result.split('\n'); const imported = []; for (let i = 0; i < lines.length; i++) { const cols = lines[i].split(','); if (cols.length < 3 || isNaN(Date.parse(cols[0].trim()))) continue; imported.push({ id: 'T' + Date.now() + i, date: cols[0].trim(), type: cols[1].trim().toLowerCase().includes('received') ? 'received' : 'lent', amount: parseFloat(cols[2]) || 0, comment: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : '', rate: cols[4] ? parseFloat(cols[4]
+  function restoreFullDatabase(event) { const file = event.target.files[0]; if (!file || !verifyMaster()) return; const reader = new FileReader(); reader.onload = (e) => { try { const data = JSON.parse(e.target.result); db.ref('ledger').set(data); alert("Restored."); } catch (err) { alert("Invalid file."); } }; reader.readAsText(file); }
+  function handleCSVTransactionImport(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const lines = e.target.result.split('\n'); const imported = []; for (let i = 0; i < lines.length; i++) { const cols = lines[i].split(','); if (cols.length < 3 || isNaN(Date.parse(cols[0].trim()))) continue; imported.push({ id: 'T' + Date.now() + i, date: cols[0].trim(), type: cols[1].trim().toLowerCase().includes('received') ? 'received' : 'lent', amount: parseFloat(cols[2]) || 0, comment: cols[3] ? cols[3].trim().replace(/^"|"$/g, '') : '', rate: cols[4] ? parseFloat(cols[4]) : null }); } if (imported.length > 0) { let person = allPeople[currentPersonId]; person.transactions = (person.transactions || []).concat(imported); db.ref(`ledger/${currentPersonId}/transactions`).set(person.transactions); alert("Imported."); } }; reader.readAsText(file); }
+  function updateMasterPassword() { const oldP = document.getElementById('oldMasterPass').value.trim(), newP = document.getElementById('newMasterPass').value.trim(); if (masterHash && sha256(oldP) !== masterHash) return alert("Incorrect Master Pass."); db.ref('masterHash').set(newP ? sha256(newP) : ""); alert("Updated."); }
+  function confirmDeleteMember() { const id = document.getElementById('memberSelect').value; if(id && verifyMaster()) { if(confirm("Delete Member?")) { db.ref(`ledger/${id}`).remove(); showIntroduction(); } } }
+  function setSort(col) { if (sortCol === col) sortDir *= -1; else { sortCol = col; sortDir = -1; } updateUI(); }
+  function resetForm() { document.getElementById('tAmount').value = ''; document.getElementById('tComment').value = ''; document.getElementById('tRate').value = ''; document.getElementById('editIdx').value = '-1'; document.getElementById('submitBtn').innerText = "Save Entry"; document.getElementById('tDate').valueAsDate = new Date(); }
+  function updatePie(s, i, r) { const ctx = document.getElementById('loanPieChart').getContext('2d'); if (myPieChart) myPieChart.destroy(); myPieChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Sent', 'Interest', 'Returned'], datasets: [{ data:[s,i,r], backgroundColor:['#00d4aa','#f1c40f','#3498db']}]}, options: { responsive: true, maintainAspectRatio: false, cutout:'70%', plugins:{legend:{position:'bottom'}}}}); }
+  function generatePDF() { const { jsPDF } = window.jspdf; const doc = new jsPDF(); doc.text(`${allPeople[currentPersonId].name} Ledger`, 14, 20); const rows = []; document.querySelectorAll("#historyBody tr").forEach(tr => { const cols = tr.querySelectorAll("td"); if(cols.length>4) rows.push([cols[0].innerText, cols[1].innerText, cols[2].innerText, cols[3].innerText, cols[4].innerText]); }); doc.autoTable({ head: [['Date', 'Type', 'Amount', 'Balance', 'Notes']], body: rows, startY: 25 }); doc.save('ledger.pdf'); }
+  function exportToCSV() { let csv = "Date,Type,Amount,Notes\n"; (allPeople[currentPersonId].transactions || []).forEach(t => csv += `${t.date},${t.type},${t.amount},"${t.comment||''}"\n`); const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); link.download = `ledger.csv`; link.click(); }
+
+  window.onload = init;
+</script>
+</body>
+</html>
